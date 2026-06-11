@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/stack.html"
+    },
+    {
+      "source": "/stack",
+      "destination": "/stack.html"
+    }
+  ]
+}

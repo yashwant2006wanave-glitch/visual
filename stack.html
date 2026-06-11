@@ -726,7 +726,7 @@
     }
 
     .code-panel {
-      background: #0b1220;
+      background: #0d1117;
     }
 
     .code-toolbar {
@@ -736,7 +736,7 @@
       gap: 16px;
       padding: 14px 16px;
       border-bottom: 1px solid rgba(51, 65, 85, 0.74);
-      background: rgba(15, 23, 42, 0.84);
+      background: #0d1117;
     }
 
     .copy-button {
@@ -751,21 +751,42 @@
       max-height: 520px;
       overflow: auto;
       padding: 18px 20px 22px;
+      background: #0d1117;
     }
 
     .code-block {
       margin: 0;
-      color: #dbeafe;
+      color: #c9d1d9;
       font-family: "Fira Code", Consolas, monospace;
       font-size: 0.88rem;
       line-height: 1.7;
       white-space: pre;
+      min-width: max-content;
     }
 
-    .token-comment { color: #64748b; }
-    .token-keyword { color: #a78bfa; }
-    .token-string { color: #67e8f9; }
-    .token-number { color: #fbbf24; }
+    .code-line {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 16px;
+      min-height: 1.7em;
+    }
+
+    .code-line-number {
+      color: #64748b;
+      text-align: right;
+      user-select: none;
+    }
+
+    .code-line-text {
+      color: #c9d1d9;
+    }
+
+    .token-comment,
+    .token-string { color: #6a9955; }
+    .token-keyword { color: #ff79c6; }
+    .token-type { color: #8be9fd; }
+    .token-function { color: #dcdcaa; }
+    .token-number { color: #b5cea8; }
 
     .comparison-wrap {
       padding: 20px;
@@ -812,14 +833,46 @@
 
     .footer {
       margin-top: 28px;
-      padding: 28px 0 40px;
+      border-top: 1px solid #334155;
+      padding: 30px 0 40px;
       color: var(--muted);
       text-align: center;
     }
 
-    .footer a {
-      color: var(--secondary);
+    .footer-inner {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+    }
+
+    .footer-logo {
+      color: #6366f1;
+      font-size: 1.2rem;
       font-weight: 800;
+    }
+
+    .footer-tagline,
+    .footer-copy {
+      margin: 0;
+    }
+
+    .footer-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px 16px;
+      font-weight: 700;
+    }
+
+    .footer-nav a {
+      color: var(--muted);
+      transition: color 180ms ease;
+    }
+
+    .footer-nav a:hover {
+      color: var(--accent-strong);
     }
 
     @keyframes dropIn {
@@ -1173,7 +1226,19 @@
   </main>
 
   <footer class="footer">
-    <p>Built for FAANG Interview Preparation · <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a></p>
+    <div class="footer-inner">
+      <div class="footer-logo">AlgoViz</div>
+      <p class="footer-tagline">Visualize. Understand. Master.</p>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="#top">Stack</a>
+        <a href="#">Queue</a>
+        <a href="#">Linked List</a>
+        <a href="#">Trees</a>
+        <a href="#">Graphs</a>
+        <a href="#">Sorting</a>
+      </nav>
+      <p class="footer-copy">&copy; 2025 AlgoViz. All rights reserved.</p>
+    </div>
   </footer>
 
   <script>
@@ -1260,86 +1325,62 @@
 
     const codeSamples = {
       JavaScript: `class Stack {
-  constructor(maxSize) {
+  constructor(capacity) {
     this.items = [];
-    this.maxSize = maxSize;
+    this.maxSize = capacity;
   }
-
-  // Add a value to the top of the stack.
   push(value) {
     if (this.isFull()) {
       throw new Error("Stack Overflow");
     }
     this.items.push(value);
   }
-
-  // Remove and return the top value.
   pop() {
     if (this.isEmpty()) {
       throw new Error("Stack Underflow");
     }
     return this.items.pop();
   }
-
-  // Read the top value without removing it.
   peek() {
     if (this.isEmpty()) {
-      return null;
+      throw new Error("Stack is Empty");
     }
     return this.items[this.items.length - 1];
   }
-
-  isEmpty() {
-    return this.items.length === 0;
-  }
-
-  isFull() {
-    return this.items.length === this.maxSize;
-  }
-
-  size() {
-    return this.items.length;
-  }
+  isEmpty() { return this.items.length === 0; }
+  isFull()  { return this.items.length === this.maxSize; }
+  size()    { return this.items.length; }
 }
-
+// Usage
 const stack = new Stack(5);
 stack.push(10);
 stack.push(20);
 console.log(stack.peek()); // 20
 console.log(stack.pop());  // 20`,
       Python: `class Stack:
-    def __init__(self, max_size):
+    def __init__(self, capacity):
         self.items = []
-        self.max_size = max_size
-
-    # Add a value to the top of the stack.
+        self.max_size = capacity
     def push(self, value):
         if self.is_full():
             raise OverflowError("Stack Overflow")
         self.items.append(value)
-
-    # Remove and return the top value.
     def pop(self):
         if self.is_empty():
             raise IndexError("Stack Underflow")
         return self.items.pop()
-
-    # Read the top value without removing it.
     def peek(self):
         if self.is_empty():
-            return None
+            raise IndexError("Stack is Empty")
         return self.items[-1]
-
     def is_empty(self):
         return len(self.items) == 0
-
     def is_full(self):
         return len(self.items) == self.max_size
-
     def size(self):
         return len(self.items)
 
-
+# Usage
 stack = Stack(5)
 stack.push(10)
 stack.push(20)
@@ -1349,24 +1390,18 @@ print(stack.pop())   # 20`,
 #include <stdexcept>
 #include <vector>
 using namespace std;
-
 class Stack {
 private:
     vector<int> items;
     int maxSize;
-
 public:
     Stack(int capacity) : maxSize(capacity) {}
-
-    // Add a value to the top of the stack.
     void push(int value) {
         if (isFull()) {
             throw overflow_error("Stack Overflow");
         }
         items.push_back(value);
     }
-
-    // Remove and return the top value.
     int pop() {
         if (isEmpty()) {
             throw underflow_error("Stack Underflow");
@@ -1375,75 +1410,64 @@ public:
         items.pop_back();
         return value;
     }
-
-    // Read the top value without removing it.
     int peek() const {
         if (isEmpty()) {
             throw underflow_error("Stack is Empty");
         }
         return items.back();
     }
-
     bool isEmpty() const { return items.empty(); }
-    bool isFull() const { return items.size() == maxSize; }
-    int size() const { return static_cast<int>(items.size()); }
+    bool isFull() const { 
+        return items.size() == maxSize; 
+    }
+    int size() const { 
+        return static_cast<int>(items.size()); 
+    }
 };
-
 int main() {
     Stack stack(5);
     stack.push(10);
     stack.push(20);
     cout << stack.peek() << endl; // 20
     cout << stack.pop() << endl;  // 20
+    return 0;
 }`,
       Java: `import java.util.ArrayList;
 
-class Stack {
-    private final ArrayList<Integer> items = new ArrayList<>();
-    private final int maxSize;
-
-    Stack(int maxSize) {
-        this.maxSize = maxSize;
+public class Stack {
+    private ArrayList<Integer> items;
+    private int maxSize;
+    public Stack(int capacity) {
+        this.items = new ArrayList<>();
+        this.maxSize = capacity;
     }
-
-    // Add a value to the top of the stack.
-    void push(int value) {
+    public void push(int value) {
         if (isFull()) {
-            throw new IllegalStateException("Stack Overflow");
+            throw new RuntimeException("Stack Overflow");
         }
         items.add(value);
     }
-
-    // Remove and return the top value.
-    int pop() {
+    public int pop() {
         if (isEmpty()) {
-            throw new IllegalStateException("Stack Underflow");
+            throw new RuntimeException("Stack Underflow");
         }
         return items.remove(items.size() - 1);
     }
-
-    // Read the top value without removing it.
-    Integer peek() {
+    public int peek() {
         if (isEmpty()) {
-            return null;
+            throw new RuntimeException("Stack is Empty");
         }
         return items.get(items.size() - 1);
     }
-
-    boolean isEmpty() {
-        return items.isEmpty();
+    public boolean isEmpty() { 
+        return items.isEmpty(); 
     }
-
-    boolean isFull() {
-        return items.size() == maxSize;
+    public boolean isFull()  { 
+        return items.size() == maxSize; 
     }
-
-    int size() {
-        return items.size();
+    public int size()        { 
+        return items.size(); 
     }
-}
-
-public class Main {
     public static void main(String[] args) {
         Stack stack = new Stack(5);
         stack.push(10);
@@ -1737,27 +1761,63 @@ public class Main {
         .replace(/'/g, "&#039;");
     }
 
-    function highlightCode(value) {
-      let code = escapeHtml(value);
-      code = code.replace(/(\/\/.*|#include.*|# .*)/g, '<span class="token-comment">$1</span>');
-      code = code.replace(/(".*?"|'.*?')/g, '<span class="token-string">$1</span>');
-      code = code.replace(/\b(class|constructor|const|let|return|if|throw|new|Error|def|self|private|public|void|int|bool|using|namespace|import|final|static|main|true|false|null|None)\b/g, '<span class="token-keyword">$1</span>');
-      code = code.replace(/\b(\d+)\b/g, '<span class="token-number">$1</span>');
-      return code;
+    function highlightSegment(segment) {
+      const keywords = new Set([
+        "class", "constructor", "const", "let", "return", "if", "throw", "new",
+        "def", "self", "private", "public", "void", "using", "namespace",
+        "import", "static", "main", "true", "false", "null", "None", "raise"
+      ]);
+      const dataTypes = new Set([
+        "int", "bool", "boolean", "vector", "ArrayList", "Integer", "String",
+        "Error", "RuntimeException", "OverflowError", "IndexError", "Stack"
+      ]);
+
+      const escaped = escapeHtml(segment);
+      return escaped.replace(/\b(\d+|[A-Za-z_]\w*)\b/g, (token, _match, offset, text) => {
+        if (/^\d+$/.test(token)) return `<span class="token-number">${token}</span>`;
+        if (dataTypes.has(token)) return `<span class="token-type">${token}</span>`;
+        if (keywords.has(token)) return `<span class="token-keyword">${token}</span>`;
+
+        const next = text.slice(offset + token.length).match(/^\s*\(/);
+        if (next) return `<span class="token-function">${token}</span>`;
+        return token;
+      });
+    }
+
+    function highlightCodeLine(line) {
+      const commentMarkers = [line.indexOf("//"), line.indexOf("#")].filter(index => index >= 0);
+      const commentIndex = commentMarkers.length ? Math.min(...commentMarkers) : -1;
+      const codePart = commentIndex >= 0 ? line.slice(0, commentIndex) : line;
+      const commentPart = commentIndex >= 0 ? line.slice(commentIndex) : "";
+
+      const highlightedCode = codePart
+        .split(/(".*?"|'.*?')/g)
+        .map(part => {
+          if (/^(".*?"|'.*?')$/.test(part)) {
+            return `<span class="token-string">${escapeHtml(part)}</span>`;
+          }
+          return highlightSegment(part);
+        })
+        .join("");
+
+      if (!commentPart) return highlightedCode;
+      return `${highlightedCode}<span class="token-comment">${escapeHtml(commentPart)}</span>`;
     }
 
     function renderCode() {
       dom.codeTitle.textContent = `${activeCode} Implementation`;
-      dom.codeBlock.innerHTML = highlightCode(codeSamples[activeCode]);
+      dom.codeBlock.innerHTML = codeSamples[activeCode]
+        .split("\n")
+        .map((line, index) => `<span class="code-line"><span class="code-line-number">${String(index + 1).padStart(2, "0")}</span><span class="code-line-text">${highlightCodeLine(line)}</span></span>`)
+        .join("");
     }
 
     async function copyCode() {
       await navigator.clipboard.writeText(codeSamples[activeCode]);
-      const original = dom.copyButton.textContent;
-      dom.copyButton.textContent = "Copied";
+      dom.copyButton.textContent = "Copied!";
       window.setTimeout(() => {
-        dom.copyButton.textContent = original;
-      }, 1100);
+        dom.copyButton.textContent = "Copy Code";
+      }, 2000);
     }
 
     function bindEvents() {
