@@ -11,6 +11,10 @@
     {
       "source": "/queue",
       "destination": "/queue.html"
+    },
+    {
+      "source": "/sorting",
+      "destination": "/sorting.html"
     }
   ]
 }
