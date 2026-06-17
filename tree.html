@@ -1367,12 +1367,153 @@
                 transform: translateY(0);
             }
         }
-    </style>
+  
+
+    /* Shared site shell: common nav/footer/closing bits without changing visualizer logic. */
+    .eyebrow {
+      margin: 0 0 0.45rem;
+      color: #f2a900;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .av-shell-footer {
+      margin-top: 0;
+      border-top: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(9, 15, 23, 0.94);
+      color: rgba(226, 232, 240, 0.78);
+    }
+    .av-footer-inner {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 34px;
+      display: grid;
+      gap: 16px;
+    }
+    .av-footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f8fafc;
+      font-weight: 900;
+      text-decoration: none;
+    }
+    .av-logo-mark {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #111827;
+      background: #f2a900;
+      font-family: "Fira Code", monospace;
+      font-size: 0.82rem;
+      box-shadow: 0 10px 24px rgba(242, 169, 0, 0.22);
+    }
+    .av-footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+    }
+    .av-footer-links a {
+      color: inherit;
+      text-decoration: none;
+      font-size: 0.92rem;
+    }
+    .av-footer-links a:hover { color: #f2a900; }
+    .av-footer-note {
+      margin: 0;
+      color: rgba(148, 163, 184, 0.92);
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+    .av-next-section {
+      width: min(1500px, calc(100% - 32px));
+      margin: 30px auto 0;
+      padding: 18px 20px;
+      border: 1px solid rgba(242, 169, 0, 0.34);
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(242, 169, 0, 0.11), rgba(15, 23, 42, 0.68));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      color: #e5e7eb;
+    }
+    .av-next-section p { margin: 0; color: rgba(226, 232, 240, 0.78); }
+    .av-next-section a {
+      color: #111827;
+      background: #f2a900;
+      text-decoration: none;
+      font-weight: 900;
+      border-radius: 8px;
+      padding: 10px 14px;
+      white-space: nowrap;
+    }
+    .av-next-kicker {
+      display: block;
+      color: #f2a900;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .av-badge-yes, .av-badge-no {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 900;
+    }
+    .av-badge-yes { color: #bbf7d0; background: rgba(22, 101, 52, 0.45); }
+    .av-badge-no { color: #fecaca; background: rgba(127, 29, 29, 0.45); }
+    .app-icon,
+    .app-card > span:first-child,
+    .pattern-card > span:first-child {
+      width: 38px;
+      height: 38px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(242, 169, 0, 0.14);
+      border: 1px solid rgba(242, 169, 0, 0.36);
+      color: #f2a900;
+      font-size: 0;
+    }
+    .app-icon::before,
+    .app-card > span:first-child::before,
+    .pattern-card > span:first-child::before {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border: 2px solid currentColor;
+      border-radius: 5px;
+      box-shadow: 6px 6px 0 -3px currentColor;
+      transform: rotate(-6deg);
+    }
+    .av-zoom-controls button,
+    .control-button,
+    .operation-button,
+    .btn-op,
+    .btn-traverse {
+      letter-spacing: 0;
+    }
+    @media (max-width: 768px) {
+      .av-next-section { align-items: flex-start; flex-direction: column; }
+      .av-next-section a { white-space: normal; }
+    }
+
+  </style>
 </head>
 <body>
     <!-- 1. NAVBAR -->
     <nav class="navbar">
-        <a href="#" class="nav-logo">
+        <a href="array.html" class="nav-logo" aria-label="AlgoViz home">
             <div class="nav-logo-mark">AV</div>
             AlgoViz
         </a>
@@ -1393,7 +1534,8 @@
     </nav>
     <!-- 2. PAGE HEADER -->
     <header class="page-header">
-        <h1>Tree Visualizer</h1>
+        <p class="eyebrow">Branching structure</p>
+      <h1>Tree Visualizer</h1>
         <p>Insert, Delete, Search and Traverse Binary Search Trees</p>
         <div class="type-toggle-container">
             <button class="btn-toggle active" id="btn-bst" onclick="switchTreeType('BST')">Binary Search Tree</button>
@@ -1420,10 +1562,10 @@
                     <span>Nodes: <span id="val-node-count">0</span></span>
                 </div>
                 <!-- Zoom and Pan Controls -->
-                <div class="canvas-controls">
+                <div class="canvas-controls av-zoom-controls">
                     <button onclick="zoomCanvas(1.25)">+</button>
                     <button onclick="zoomCanvas(0.8)">-</button>
-                    <button class="btn-fit-screen" onclick="resetCanvasView()">Fit to Screen</button>
+                    <button class="btn-fit-screen" onclick="resetCanvasView()">Fit</button>
                     <button class="btn-toggle-edges" id="btn-toggle-labels" onclick="toggleEdgeLabels()">Labels: On</button>
                 </div>
                 <!-- Empty State Indicator -->
@@ -1637,8 +1779,8 @@
                 <tbody>
                     <tr id="row-feat-balance">
                         <td>Balance</td>
-                        <td>❌ None</td>
-                        <td>✅ Always</td>
+                        <td><span class="av-badge-no">No</span> None</td>
+                        <td><span class="av-badge-yes">Yes</span> Always</td>
                         <td>Partial</td>
                     </tr>
                     <tr id="row-feat-insert">
@@ -1663,12 +1805,12 @@
                         <td>Min element</td>
                         <td>O(log n)</td>
                         <td>O(log n)</td>
-                        <td>O(1) ✅</td>
+                        <td>O(1) Yes</td>
                     </tr>
                     <tr id="row-feat-worstcase">
                         <td>Worst case</td>
-                        <td>O(n) ❌</td>
-                        <td>O(log n) ✅</td>
+                        <td>O(n) No</td>
+                        <td>O(log n) Yes</td>
                         <td>O(log n)</td>
                     </tr>
                     <tr id="row-feat-usecase">
@@ -1684,22 +1826,22 @@
         <!-- 11. REAL WORLD APPLICATIONS -->
         <section class="apps-container">
             <div class="app-card">
-                <div class="app-icon">🗄️</div>
+                <div class="app-icon"></div>
                 <h4>Database Indexing</h4>
                 <p>BST/AVL for B-tree database index algorithms to execute query retrievals in logarithmic time.</p>
             </div>
             <div class="app-card">
-                <div class="app-icon">📁</div>
+                <div class="app-icon"></div>
                 <h4>File Systems</h4>
                 <p>Trees provide the hierarchical structures that map directory paths and folder scopes on disk systems.</p>
             </div>
             <div class="app-card">
-                <div class="app-icon">🎯</div>
+                <div class="app-icon"></div>
                 <h4>Priority Queues</h4>
                 <p>Min/Max Heaps are the fundamental data structure supporting greedy algorithms, Dijkstra, and task queues.</p>
             </div>
             <div class="app-card">
-                <div class="app-icon">🔍</div>
+                <div class="app-icon"></div>
                 <h4>Autocomplete</h4>
                 <p>Sorted prefix trees and BST dictionary indexes assist predictive keyboard text and auto searches.</p>
             </div>
@@ -1727,37 +1869,33 @@
         <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">Node positions physically shifted to restore height balance.</p>
     </div>
     <!-- 12. FOOTER -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <div class="footer-logo"><span>Algo</span>Viz</div>
-                <div class="footer-tagline">Visualize. Understand. Master.</div>
-            </div>
-            <div class="footer-links-grid">
-                <div class="footer-links-col">
-                    <h5>Structures</h5>
-                    <ul>
-                        <li><a href="array.html">Arrays</a></li>
-                        <li><a href="stack.html">Stack</a></li>
-                        <li><a href="queue.html">Queue</a></li>
-                        <li><a href="linkedlist.html">Linked List</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links-col">
-                    <h5>Non-Linear</h5>
-                    <ul>
-                        <li><a href="tree.html">Trees</a></li>
-                        <li><a href="graph.html">Graphs</a></li>
-                        <li><a href="sorting.html">Sorting</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div>© 2025 AlgoViz. All rights reserved.</div>
-            <div>Designed for FAANG-level DSA learning.</div>
-        </div>
-    </footer>
+  <section class="av-next-section" aria-label="Next topic">
+    <div>
+      <span class="av-next-kicker">Next</span>
+      <strong>Explore Graphs</strong>
+      <p>Trees keep one parent per node. Graphs remove that rule and get messy in useful ways.</p>
+    </div>
+    <a href="graph.html">Open Graphs</a>
+  </section>
+
+  <footer class="footer av-shell-footer">
+    <div class="av-footer-inner">
+      <a class="av-footer-brand" href="array.html" aria-label="AlgoViz home">
+        <span class="av-logo-mark">AV</span>
+        <span>AlgoViz</span>
+      </a>
+      <nav class="av-footer-links" aria-label="Footer navigation">
+        <a href="array.html">Arrays</a>
+        <a href="stack.html">Stack</a>
+        <a href="queue.html">Queue</a>
+        <a href="linkedlist.html">Linked List</a>
+        <a href="tree.html">Trees</a>
+        <a href="graph.html">Graphs</a>
+        <a href="sorting.html">Sorting</a>
+      </nav>
+      <p class="av-footer-note">Made by Yashwant Wanave. Small DSA visualizer notes, still adding the next pieces.</p>
+    </div>
+  </footer>
     <!-- LOGIC SCRIPT -->
     <script>
         // Global variables for SVG dimensions and Zoom/Pan Viewport state
@@ -2374,8 +2512,8 @@ public:
             let height = 0;
             let minVal = "None";
             let maxVal = "None";
-            let balanced = "Yes ✅";
-            let validBST = "Yes ✅";
+            let balanced = "Yes Yes";
+            let validBST = "Yes Yes";
             let leaves = 0;
             let rootVal = "None";
             if (activeTreeType === 'HEAP') {
@@ -2391,8 +2529,8 @@ public:
                     // Count leaves in binary heap
                     leaves = nodeCount - Math.floor(nodeCount / 2);
                 }
-                balanced = "Yes ✅"; // Heap is left-complete
-                validBST = "No ❌"; // Heaps do not satisfy BST property
+                balanced = "Yes Yes"; // Heap is left-complete
+                validBST = "No No"; // Heaps do not satisfy BST property
             } else {
                 // BST / AVL
                 if (rootNode) {
@@ -2432,13 +2570,13 @@ public:
                         if (Math.abs(lh - rh) > 1) return false;
                         return checkBalanced(n.left) && checkBalanced(n.right);
                     };
-                    balanced = checkBalanced(rootNode) ? "Yes ✅" : "No ❌";
+                    balanced = checkBalanced(rootNode) ? "Yes Yes" : "No No";
                     const checkBST = (n, min = -Infinity, max = Infinity) => {
                         if (!n) return true;
                         if (n.val <= min || n.val >= max) return false;
                         return checkBST(n.left, min, n.val) && checkBST(n.right, n.val, max);
                     };
-                    validBST = checkBST(rootNode) ? "Yes ✅" : "No ❌";
+                    validBST = checkBST(rootNode) ? "Yes Yes" : "No No";
                 }
             }
             // Push to DOM
@@ -3137,7 +3275,7 @@ public:
                 const container = document.getElementById('canvas-container');
                 const xDiv = document.createElement('div');
                 xDiv.className = 'red-x-overlay';
-                xDiv.innerHTML = "❌";
+                xDiv.innerHTML = "No";
                 xDiv.style.left = `${x}px`;
                 xDiv.style.top = `${y}px`;
                 container.appendChild(xDiv);
@@ -3196,7 +3334,7 @@ public:
                     document.getElementById('stat-last-op-steps').innerHTML = `
                         Root node was null. Created root node with value <strong>${val}</strong>.
                     `;
-                    logStatus(`Inserted ${val} as tree Root node ✅`, 'var(--color-node-found-border)');
+                    logStatus(`Inserted ${val} as tree Root node Yes`, 'var(--color-node-found-border)');
                     highlightCodeLine(null);
                     return;
                 }
@@ -3218,7 +3356,7 @@ public:
                             highlightCodeLine(5);
                             curr.left = new TreeNode(val);
                             steps.push(`Left child was empty. Inserted new node <strong>${val}</strong>.`);
-                            logStatus(`Inserted ${val} under ${curr.val} ✅`, 'var(--color-node-found-border)');
+                            logStatus(`Inserted ${val} under ${curr.val} Yes`, 'var(--color-node-found-border)');
                             break;
                         } else {
                             SVGRenderer.highlightEdge(curr.id, curr.left.id, 'traversal');
@@ -3238,7 +3376,7 @@ public:
                             highlightCodeLine(7);
                             curr.right = new TreeNode(val);
                             steps.push(`Right child was empty. Inserted new node <strong>${val}</strong>.`);
-                            logStatus(`Inserted ${val} under ${curr.val} ✅`, 'var(--color-node-found-border)');
+                            logStatus(`Inserted ${val} under ${curr.val} Yes`, 'var(--color-node-found-border)');
                             break;
                         } else {
                             SVGRenderer.highlightEdge(curr.id, curr.right.id, 'traversal');
@@ -3249,7 +3387,7 @@ public:
                     } else {
                         SVGRenderer.showCompareTooltip(val, `== ${curr.val} (Duplicate)`, curr.x, curr.y);
                         steps.push(`Value ${val} already exists. BST does not allow duplicates.`);
-                        logStatus(`Value ${val} already exists in tree ❌`, '#ef4444');
+                        logStatus(`Value ${val} already exists in tree No`, '#ef4444');
                         await sleep(animationSpeed);
                         SVGRenderer.hideCompareTooltip();
                         SVGRenderer.unhighlightNode(curr.id, 'highlighted');
@@ -3276,7 +3414,7 @@ public:
                 highlightCodeLine(1);
                 if (!treeRoot) {
                     highlightCodeLine(2);
-                    logStatus(`Tree is empty. Search failed ❌`, '#ef4444');
+                    logStatus(`Tree is empty. Search failed No`, '#ef4444');
                     return false;
                 }
                 let curr = treeRoot;
@@ -3288,7 +3426,7 @@ public:
                     highlightCodeLine(3);
                     if (curr.val === val) {
                         SVGRenderer.showCompareTooltip(val, `Found!`, curr.x, curr.y);
-                        logStatus(`Found ${val} in tree! 🔍`, 'var(--color-node-found-border)');
+                        logStatus(`Found ${val} in tree! `, 'var(--color-node-found-border)');
                         steps.push(`Found node matching value <strong>${val}</strong>.`);
                         
                         await sleep(animationSpeed);
@@ -3343,7 +3481,7 @@ public:
                 if (!found) {
                     highlightCodeLine(2);
                     steps.push(`Reached null. Value <strong>${val}</strong> not found.`);
-                    logStatus(`Value ${val} not found in tree ❌`, '#ef4444');
+                    logStatus(`Value ${val} not found in tree No`, '#ef4444');
                     SVGRenderer.triggerRedXAnimation(400, 200);
                 }
                 document.getElementById('stat-last-op-steps').innerHTML = steps.map(s => `<li>${s}</li>`).join('');
@@ -3416,7 +3554,7 @@ public:
                         if (!node.left && !node.right) {
                             highlightCodeLine(8);
                             steps.push(`Node is a leaf. Delete directly.`);
-                            logStatus(`Deleted leaf node ${value} ✅`, 'var(--color-node-found-border)');
+                            logStatus(`Deleted leaf node ${value} Yes`, 'var(--color-node-found-border)');
                             
                             // Shrink circle
                             const circ = groupEl.querySelector('circle');
@@ -3429,7 +3567,7 @@ public:
                         if (!node.left) {
                             highlightCodeLine(8);
                             steps.push(`Node has only right child. Replace node with right subtree.`);
-                            logStatus(`Replaced node ${value} with its right child ✅`, 'var(--color-node-found-border)');
+                            logStatus(`Replaced node ${value} with its right child Yes`, 'var(--color-node-found-border)');
                             
                             // Fade out transition
                             groupEl.style.opacity = 0;
@@ -3440,7 +3578,7 @@ public:
                         if (!node.right) {
                             highlightCodeLine(9);
                             steps.push(`Node has only left child. Replace node with left subtree.`);
-                            logStatus(`Replaced node ${value} with its left child ✅`, 'var(--color-node-found-border)');
+                            logStatus(`Replaced node ${value} with its left child Yes`, 'var(--color-node-found-border)');
                             
                             groupEl.style.opacity = 0;
                             await sleep(300);
@@ -3494,7 +3632,7 @@ public:
                     TreeLayoutEngine.layout(treeRoot);
                     await SVGRenderer.animateLayout(oldPositions);
                 } else {
-                    logStatus(`Value ${val} not found in tree ❌`, '#ef4444');
+                    logStatus(`Value ${val} not found in tree No`, '#ef4444');
                     SVGRenderer.triggerRedXAnimation(400, 200);
                 }
                 document.getElementById('stat-last-op-steps').innerHTML = steps.map(s => `<li>${s}</li>`).join('');
@@ -3514,7 +3652,7 @@ public:
                     TreeLayoutEngine.layout(treeRoot);
                     SVGRenderer.renderTree(treeRoot);
                     steps.push(`Created AVL root node with value <strong>${val}</strong>.`);
-                    logStatus(`Inserted ${val} as root node ✅`, 'var(--color-node-found-border)');
+                    logStatus(`Inserted ${val} as root node Yes`, 'var(--color-node-found-border)');
                     return;
                 }
                 // Path tracking list for traversal animations
@@ -3743,7 +3881,7 @@ public:
                 TreeLayoutEngine.layout(treeRoot);
                 await SVGRenderer.animateLayout(oldPositions);
                 if (!nodeFound) {
-                    logStatus(`Value ${val} not found in AVL tree ❌`, '#ef4444');
+                    logStatus(`Value ${val} not found in AVL tree No`, '#ef4444');
                     SVGRenderer.triggerRedXAnimation(400, 200);
                 }
             }
@@ -3873,7 +4011,7 @@ public:
                     }
                 }
                 SVGRenderer.renderHeap();
-                logStatus(`Inserted value ${val} successfully! Heap property satisfied ✅`, 'var(--color-node-found-border)');
+                logStatus(`Inserted value ${val} successfully! Heap property satisfied Yes`, 'var(--color-node-found-border)');
             }
             // Extract minimum node & heapifyDown bubble
             static async extractMin() {
@@ -3885,7 +4023,7 @@ public:
                 if (heapArray.length === 1) {
                     heapArray.pop();
                     SVGRenderer.renderHeap();
-                    logStatus(`Extracted last remaining root node. Heap is empty ✅`, 'var(--color-node-found-border)');
+                    logStatus(`Extracted last remaining root node. Heap is empty Yes`, 'var(--color-node-found-border)');
                     return;
                 }
                 // Move last item to root index
@@ -3953,7 +4091,7 @@ public:
                     }
                 }
                 SVGRenderer.renderHeap();
-                logStatus(`Completed extraction. Min Heap properties satisfied ✅`, 'var(--color-node-found-border)');
+                logStatus(`Completed extraction. Min Heap properties satisfied Yes`, 'var(--color-node-found-border)');
             }
             // Animate node positions shifting
             static async animateSwap(idx1, idx2) {
@@ -3978,7 +4116,7 @@ public:
                         foundIdx = i;
                         SVGRenderer.unhighlightNode(`heap-${i}`, 'highlighted', true);
                         SVGRenderer.highlightNode(`heap-${i}`, 'found', true);
-                        logStatus(`Found target value ${val} at array index ${i} 🔍`, 'var(--color-node-found-border)');
+                        logStatus(`Found target value ${val} at array index ${i} `, 'var(--color-node-found-border)');
                         await SVGRenderer.triggerRippleAnimation(
                             TreeLayoutEngine.getHeapNodePosition(i, heapArray.length).x,
                             TreeLayoutEngine.getHeapNodePosition(i, heapArray.length).y
@@ -3989,7 +4127,7 @@ public:
                     highlightHeapArrBox(i, false);
                 }
                 if (foundIdx === -1) {
-                    logStatus(`Value ${val} not found in Min Heap array ❌`, '#ef4444');
+                    logStatus(`Value ${val} not found in Min Heap array No`, '#ef4444');
                     SVGRenderer.triggerRedXAnimation(400, 200);
                 }
             }
@@ -4020,7 +4158,7 @@ public:
                     if (!treeRoot) return;
                     await TraversalController.traverseTree(treeRoot, type);
                 }
-                logStatus(`Completed ${type.toUpperCase()} traversal! ✅`, 'var(--color-node-found-border)');
+                logStatus(`Completed ${type.toUpperCase()} traversal! Yes`, 'var(--color-node-found-border)');
                 highlightCodeLine(null);
                 CallStackVisualizer.clear();
             }
@@ -4383,7 +4521,7 @@ public:
                 }
                 updateStatsTable();
                 setInteractiveState(true);
-                logStatus(`${activeTreeType} loaded. Ready for operations. ✅`, 'var(--color-node-found-border)');
+                logStatus(`${activeTreeType} loaded. Ready for operations.`, 'var(--color-node-found-border)');
             })();
         }
         // Initialize script dependencies on window load

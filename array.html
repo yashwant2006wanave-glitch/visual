@@ -116,6 +116,10 @@
     .array-cell.current { background: #312e81; border-color: var(--accent-strong); box-shadow: 0 0 24px rgba(129,140,248,.62); transform: translateY(-6px) scale(1.04); }
     .array-cell.left { background: #1e3a5f; border-color: var(--secondary); }
     .array-cell.right { background: #3b0764; border-color: var(--purple); }
+    .array-cell.in-window { outline: 3px solid rgba(99,102,241,.42); outline-offset: 3px; }
+    .array-cell.prefix-ready { box-shadow: 0 0 22px rgba(34,211,238,.35), 0 14px 34px rgba(2,6,23,.32); }
+    .array-cell.best { background: #064e3b; border-color: var(--green); box-shadow: 0 0 26px rgba(34,197,94,.5); }
+    .array-cell.kadane-drop { background: #7f1d1d; border-color: var(--danger); opacity: .72; }
     .array-cell.dim { opacity: .28; }
     .array-cell.inserted { animation: dropIn .4s cubic-bezier(.2,1.2,.36,1) both; }
     .pointer {
@@ -135,6 +139,19 @@
     .window-band span {
       position: absolute; top: -24px; left: 50%; transform: translateX(-50%); color: var(--accent-strong); font-size: .72rem; font-weight: 900;
     }
+    .trace-panel {
+      display: none; min-width: min(760px, 100%); margin: 4px 6px 0; padding: 14px;
+      border: 1px solid rgba(51,65,85,.9); border-radius: 10px; background: rgba(15,23,42,.78);
+      box-shadow: inset 0 0 0 1px rgba(148,163,184,.04); gap: 12px;
+    }
+    .trace-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .trace-head strong { color: #e0f2fe; }
+    .trace-head span { color: var(--muted); font-size: .78rem; font-weight: 800; }
+    .trace-cards { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 10px; }
+    .trace-card { border: 1px solid rgba(51,65,85,.85); border-radius: 8px; padding: 10px; background: rgba(30,41,59,.72); }
+    .trace-card span { display: block; color: var(--muted); font-size: .7rem; font-weight: 900; text-transform: uppercase; }
+    .trace-card strong { display: block; margin-top: 6px; font-family: "Fira Code", monospace; color: #f8fafc; }
+    .trace-formula { border-left: 3px solid var(--secondary); padding-left: 10px; color: #c4b5fd; font-family: "Fira Code", monospace; font-size: .86rem; line-height: 1.5; }
     .copy-row { margin-top: 20px; padding-top: 12px; border-top: 1px dashed rgba(148,163,184,.3); }
     .stats-bar {
       display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px;
@@ -221,16 +238,158 @@
       .nav-links a { justify-content: center; }
       .visual-header, .section-header, .code-toolbar, .status-row { align-items: flex-start; flex-direction: column; display: flex; }
       .stats-bar, .control-grid, .builder-grid, .info-grid, .pattern-grid, .apps, .complexity-badges { grid-template-columns: 1fr; }
+      .trace-cards { grid-template-columns: 1fr 1fr; }
       .array-cell { width: 44px; height: 44px; font-size: 1rem; }
       .array-item-wrap { width: 52px; height: 104px; }
       .matrix-cell { width: 42px; height: 42px; }
     }
+
+
+    /* Shared site shell: common nav/footer/closing bits without changing visualizer logic. */
+    .eyebrow {
+      margin: 0 0 0.45rem;
+      color: #f2a900;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .av-shell-footer {
+      margin-top: 0;
+      border-top: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(9, 15, 23, 0.94);
+      color: rgba(226, 232, 240, 0.78);
+    }
+    .av-footer-inner {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 34px;
+      display: grid;
+      gap: 16px;
+    }
+    .av-footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f8fafc;
+      font-weight: 900;
+      text-decoration: none;
+    }
+    .av-logo-mark {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #111827;
+      background: #f2a900;
+      font-family: "Fira Code", monospace;
+      font-size: 0.82rem;
+      box-shadow: 0 10px 24px rgba(242, 169, 0, 0.22);
+    }
+    .av-footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+    }
+    .av-footer-links a {
+      color: inherit;
+      text-decoration: none;
+      font-size: 0.92rem;
+    }
+    .av-footer-links a:hover { color: #f2a900; }
+    .av-footer-note {
+      margin: 0;
+      color: rgba(148, 163, 184, 0.92);
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+    .av-next-section {
+      width: min(1500px, calc(100% - 32px));
+      margin: 30px auto 0;
+      padding: 18px 20px;
+      border: 1px solid rgba(242, 169, 0, 0.34);
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(242, 169, 0, 0.11), rgba(15, 23, 42, 0.68));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      color: #e5e7eb;
+    }
+    .av-next-section p { margin: 0; color: rgba(226, 232, 240, 0.78); }
+    .av-next-section a {
+      color: #111827;
+      background: #f2a900;
+      text-decoration: none;
+      font-weight: 900;
+      border-radius: 8px;
+      padding: 10px 14px;
+      white-space: nowrap;
+    }
+    .av-next-kicker {
+      display: block;
+      color: #f2a900;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .av-badge-yes, .av-badge-no {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 900;
+    }
+    .av-badge-yes { color: #bbf7d0; background: rgba(22, 101, 52, 0.45); }
+    .av-badge-no { color: #fecaca; background: rgba(127, 29, 29, 0.45); }
+    .app-icon,
+    .app-card > span:first-child,
+    .pattern-card > span:first-child {
+      width: 38px;
+      height: 38px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(242, 169, 0, 0.14);
+      border: 1px solid rgba(242, 169, 0, 0.36);
+      color: #f2a900;
+      font-size: 0;
+    }
+    .app-icon::before,
+    .app-card > span:first-child::before,
+    .pattern-card > span:first-child::before {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border: 2px solid currentColor;
+      border-radius: 5px;
+      box-shadow: 6px 6px 0 -3px currentColor;
+      transform: rotate(-6deg);
+    }
+    .av-zoom-controls button,
+    .control-button,
+    .operation-button,
+    .btn-op,
+    .btn-traverse {
+      letter-spacing: 0;
+    }
+    @media (max-width: 768px) {
+      .av-next-section { align-items: flex-start; flex-direction: column; }
+      .av-next-section a { white-space: normal; }
+    }
+
   </style>
 </head>
 <body>
   <nav class="navbar">
     <div class="nav-inner">
-      <a class="logo" href="array.html"><span class="logo-mark">AV</span><span>AlgoViz</span></a>
+      <a href="array.html" class="logo" aria-label="AlgoViz home"><span class="logo-mark" aria-hidden="true">AV</span><span>AlgoViz</span></a>
       <button class="hamburger" id="menuButton" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
       <ul class="nav-links" id="navLinks">
         <li><a class="active" href="array.html">Arrays</a></li>
@@ -246,8 +405,9 @@
 
   <main class="page">
     <header class="hero">
+      <p class="eyebrow">Array basics</p>
       <h1>Array Visualizer</h1>
-      <p>The foundation of every data structure and algorithm in computer science</p>
+      <p>A compact workspace for index-based operations and common array patterns.</p>
       <div class="pill-row" id="categoryPills"></div>
     </header>
 
@@ -269,6 +429,7 @@
         <div id="arrayRow" class="array-row"></div>
         <div id="copyRow" class="array-row copy-row" style="display:none"></div>
         <div id="matrixView" style="display:none"></div>
+        <div id="tracePanel" class="trace-panel"></div>
       </div>
       <div class="stats-bar" id="statsBar"></div>
     </section>
@@ -283,10 +444,10 @@
       <div class="play-controls">
         <label class="field" style="min-width:180px">Speed <span class="small-label" id="speedLabel">Medium</span><input type="range" id="speedRange" min="0" max="2" value="1"></label>
         <span class="metric-card"><span>Step</span><strong id="stepCounter">0 / 0</strong></span>
-        <button class="control-button primary" id="playButton" type="button">▶ Play</button>
-        <button class="control-button" id="pauseButton" type="button">⏸ Pause</button>
-        <button class="control-button" id="stepButton" type="button">⏭ Step</button>
-        <button class="control-button" id="resetButton" type="button">↺ Reset</button>
+        <button class="control-button primary" id="playButton" type="button">Play</button>
+        <button class="control-button" id="pauseButton" type="button">Pause</button>
+        <button class="control-button" id="stepButton" type="button">Step</button>
+        <button class="control-button" id="resetButton" type="button">Reset</button>
       </div>
     </section>
 
@@ -307,7 +468,7 @@
 
     <section class="info-grid">
       <div class="panel info-card">
-        <h2 id="operationName">Operation Info <span class="mini-button active" style="padding:5px 8px">💼 FAANG</span></h2>
+        <h2 id="operationName">Operation Info <span class="mini-button active" style="padding:5px 8px">Useful pattern</span></h2>
         <p id="operationDescription" class="small-label"></p>
         <table class="data-table"><tbody id="metricsBody"></tbody></table>
         <div class="complexity-badges" id="complexityBadges"></div>
@@ -338,26 +499,26 @@
         <table class="data-table">
           <thead><tr><th>Feature</th><th>Array</th><th>LinkedList</th><th>Stack</th><th>Queue</th></tr></thead>
           <tbody>
-            <tr><td>Access by idx</td><td>O(1)✅</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr>
+            <tr><td>Access by idx</td><td>O(1) <span class="av-badge-yes">Yes</span></td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr>
             <tr><td>Insert at end</td><td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(1)</td></tr>
-            <tr><td>Insert at start</td><td>O(n)</td><td>O(1)✅</td><td>O(n)</td><td>O(n)</td></tr>
+            <tr><td>Insert at start</td><td>O(n)</td><td>O(1) <span class="av-badge-yes">Yes</span></td><td>O(n)</td><td>O(n)</td></tr>
             <tr><td>Delete at mid</td><td>O(n)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr>
             <tr><td>Search</td><td>O(n)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr>
-            <tr><td>Memory</td><td>Compact✅</td><td>Extra ptr</td><td>Compact</td><td>Compact</td></tr>
-            <tr><td>Random Access</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
-            <tr><td>Cache Friendly</td><td>✅✅</td><td>❌</td><td>✅</td><td>✅</td></tr>
+            <tr><td>Memory</td><td>Compact <span class="av-badge-yes">Yes</span></td><td>Extra ptr</td><td>Compact</td><td>Compact</td></tr>
+            <tr><td>Random Access</td><td><span class="av-badge-yes">Yes</span></td><td><span class="av-badge-no">No</span></td><td><span class="av-badge-no">No</span></td><td><span class="av-badge-no">No</span></td></tr>
+            <tr><td>Cache Friendly</td><td><span class="av-badge-yes">Yes</span></td><td><span class="av-badge-no">No</span></td><td><span class="av-badge-yes">Yes</span></td><td><span class="av-badge-yes">Yes</span></td></tr>
           </tbody>
         </table>
       </div>
     </section>
 
     <section class="section">
-      <div class="section-header"><h2>FAANG Interview Patterns</h2></div>
+      <div class="section-header"><h2>Interview Patterns</h2></div>
       <div class="pattern-grid">
-        <article class="pattern-card"><span>🎯</span><h3>Two Pointers Pattern</h3><p>Used in Two Sum, Container Water, Remove Duplicates, 3Sum.</p><button class="control-button primary" data-demo="two">Visualize →</button></article>
-        <article class="pattern-card"><span>🪟</span><h3>Sliding Window Pattern</h3><p>Used in Max Subarray, Longest Substring, Minimum Window.</p><button class="control-button primary" data-demo="window">Visualize →</button></article>
-        <article class="pattern-card"><span>➕</span><h3>Prefix Sum Pattern</h3><p>Used in Range Sum Query, Subarray Sum=K, Running Sum.</p><button class="control-button primary" data-demo="prefix">Visualize →</button></article>
-        <article class="pattern-card"><span>🔄</span><h3>Kadane's Algorithm</h3><p>Used in Maximum Subarray, Stock Profit, Circular Subarray.</p><button class="control-button primary" data-demo="kadane">Visualize →</button></article>
+        <article class="pattern-card"><span></span><h3>Two Pointers Pattern</h3><p>Used in Two Sum, Container Water, Remove Duplicates, 3Sum.</p><button class="control-button primary" data-demo="two">Visualize →</button></article>
+        <article class="pattern-card"><span></span><h3>Sliding Window Pattern</h3><p>Used in Max Subarray, Longest Substring, Minimum Window.</p><button class="control-button primary" data-demo="window">Visualize →</button></article>
+        <article class="pattern-card"><span></span><h3>Prefix Sum Pattern</h3><p>Used in Range Sum Query, Subarray Sum=K, Running Sum.</p><button class="control-button primary" data-demo="prefix">Visualize →</button></article>
+        <article class="pattern-card"><span></span><h3>Kadane's Algorithm</h3><p>Used in Maximum Subarray, Stock Profit, Circular Subarray.</p><button class="control-button primary" data-demo="kadane">Visualize →</button></article>
       </div>
     </section>
 
@@ -372,18 +533,38 @@
     <section class="section">
       <div class="section-header"><h2>Real World Applications</h2></div>
       <div class="apps">
-        <article class="app-card"><span>📸</span><h3>Image Processing</h3><p>2D arrays represent pixel grids for filters, transforms, and convolution.</p></article>
-        <article class="app-card"><span>🎵</span><h3>Audio Processing</h3><p>Arrays store sound wave samples for editing, compression, and playback.</p></article>
-        <article class="app-card"><span>🏦</span><h3>Stock Price Analysis</h3><p>Prefix sums and sliding windows calculate ranges and trends quickly.</p></article>
-        <article class="app-card"><span>🎮</span><h3>Game Development</h3><p>2D arrays model maps, boards, collision grids, and tile layers.</p></article>
+        <article class="app-card"><span></span><h3>Image Processing</h3><p>2D arrays represent pixel grids for filters, transforms, and convolution.</p></article>
+        <article class="app-card"><span></span><h3>Audio Processing</h3><p>Arrays store sound wave samples for editing, compression, and playback.</p></article>
+        <article class="app-card"><span></span><h3>Stock Price Analysis</h3><p>Prefix sums and sliding windows calculate ranges and trends quickly.</p></article>
+        <article class="app-card"><span></span><h3>Game Development</h3><p>2D arrays model maps, boards, collision grids, and tile layers.</p></article>
       </div>
     </section>
   </main>
+  <section class="av-next-section" aria-label="Next topic">
+    <div>
+      <span class="av-next-kicker">Next</span>
+      <strong>Explore Sorting Algorithms</strong>
+      <p>Arrays are the setup. Sorting shows what repeated comparisons do to that same memory.</p>
+    </div>
+    <a href="sorting.html">Open Sorting Algorithms</a>
+  </section>
 
-  <footer class="footer">
-    <div class="footer-inner">
-      <div><a class="logo" href="array.html"><span class="logo-mark">AV</span><span>AlgoViz</span></a><div style="margin-top:8px">Visualize. Understand. Master.</div><div style="margin-top:8px">© 2025 AlgoViz. All rights reserved. Built with ❤️ by Yashwant Wanave</div></div>
-      <div class="footer-links"><a class="active" href="array.html">Arrays</a><a href="stack.html">Stack</a><a href="queue.html">Queue</a><a href="linkedlist.html">Linked List</a><a href="tree.html">Trees</a><a href="graph.html">Graphs</a><a href="sorting.html">Sorting</a></div>
+  <footer class="footer av-shell-footer">
+    <div class="av-footer-inner">
+      <a class="av-footer-brand" href="array.html" aria-label="AlgoViz home">
+        <span class="av-logo-mark">AV</span>
+        <span>AlgoViz</span>
+      </a>
+      <nav class="av-footer-links" aria-label="Footer navigation">
+        <a href="array.html">Arrays</a>
+        <a href="stack.html">Stack</a>
+        <a href="queue.html">Queue</a>
+        <a href="linkedlist.html">Linked List</a>
+        <a href="tree.html">Trees</a>
+        <a href="graph.html">Graphs</a>
+        <a href="sorting.html">Sorting</a>
+      </nav>
+      <p class="av-footer-note">Made by Yashwant Wanave. Small DSA visualizer notes, still adding the next pieces.</p>
     </div>
   </footer>
 
@@ -438,10 +619,10 @@
       "C++": `#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\nint linearSearch(vector<int>& arr, int target) {\n  for (int i = 0; i < arr.size(); i++) if (arr[i] == target) return i;\n  return -1;\n}\nint binarySearch(vector<int>& arr, int target) {\n  int low = 0, high = arr.size() - 1;\n  while (low <= high) {\n    int mid = low + (high - low) / 2;\n    if (arr[mid] == target) return mid;\n    if (arr[mid] < target) low = mid + 1; else high = mid - 1;\n  }\n  return -1;\n}\npair<int,int> twoSum(vector<int>& arr, int target) {\n  int left = 0, right = arr.size() - 1;\n  while (left < right) {\n    int sum = arr[left] + arr[right];\n    if (sum == target) return {left, right};\n    if (sum < target) left++; else right--;\n  }\n  return {-1, -1};\n}\nint maxSumSubarray(vector<int>& arr, int k) {\n  int windowSum = 0, maxSum = 0;\n  for (int i = 0; i < k; i++) windowSum += arr[i];\n  maxSum = windowSum;\n  for (int i = k; i < arr.size(); i++) {\n    windowSum += arr[i] - arr[i-k];\n    maxSum = max(maxSum, windowSum);\n  }\n  return maxSum;\n}\nvector<int> buildPrefix(vector<int>& arr) {\n  vector<int> prefix(arr.size()); prefix[0] = arr[0];\n  for (int i = 1; i < arr.size(); i++) prefix[i] = prefix[i-1] + arr[i];\n  return prefix;\n}\nvoid rotateLeft(vector<int>& arr, int k) {\n  int n = arr.size(); k %= n;\n  reverse(arr.begin(), arr.begin() + k);\n  reverse(arr.begin() + k, arr.end());\n  reverse(arr.begin(), arr.end());\n}`,
       Java: `class ArrayAlgorithms {\n  static int linearSearch(int[] arr, int target) {\n    for (int i = 0; i < arr.length; i++) if (arr[i] == target) return i;\n    return -1;\n  }\n  static int binarySearch(int[] arr, int target) {\n    int low = 0, high = arr.length - 1;\n    while (low <= high) {\n      int mid = low + (high - low) / 2;\n      if (arr[mid] == target) return mid;\n      if (arr[mid] < target) low = mid + 1; else high = mid - 1;\n    }\n    return -1;\n  }\n}`
     };
-    const dom = Object.fromEntries(["menuButton","navLinks","categoryPills","operationTabs","controlGrid","arrayRow","copyRow","matrixView","statsBar","statusBox","speedRange","speedLabel","stepCounter","playButton","pauseButton","stepButton","resetButton","customArray","setArrayButton","randomButton","sortedButton","reverseSortedButton","clearButton","sizeRange","sizeLabel","operationName","operationDescription","metricsBody","complexityBadges","complexityTable","pseudoTabs","pseudoCode","codeTabs","codeTitle","codeBlock","copyCodeButton","visualTitle","stepExplanation","memoryToggle","kadaneButton","kadaneStatus"].map(id => [id, document.getElementById(id)]));
+    const dom = Object.fromEntries(["menuButton","navLinks","categoryPills","operationTabs","controlGrid","arrayRow","copyRow","matrixView","tracePanel","statsBar","statusBox","speedRange","speedLabel","stepCounter","playButton","pauseButton","stepButton","resetButton","customArray","setArrayButton","randomButton","sortedButton","reverseSortedButton","clearButton","sizeRange","sizeLabel","operationName","operationDescription","metricsBody","complexityBadges","complexityTable","pseudoTabs","pseudoCode","codeTabs","codeTitle","codeBlock","copyCodeButton","visualTitle","stepExplanation","memoryToggle","kadaneButton","kadaneStatus"].map(id => [id, document.getElementById(id)]));
     let arr = [5,3,8,1,9,2,7,4], original = [...arr], matrix = [[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]];
     let activeCategory = "operations", activeOp = "Insert", arrayType = "int", showMemory = true;
-    let states = {}, pointers = {}, windowRange = null, prefixArray = [], copyArray = [], currentLine = null;
+    let states = {}, pointers = {}, windowRange = null, prefixArray = [], copyArray = [], traceState = null, currentLine = null;
     let steps = [], stepIndex = 0, playing = false, metrics = { comparisons:0, swaps:0, started:0, elapsed:0 };
     let activeCode = "JavaScript";
     const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -476,18 +657,28 @@
       dom.matrixView.style.display = activeCategory === "matrix" ? "block" : "none";
       dom.arrayRow.style.display = activeCategory === "matrix" ? "none" : "flex";
       dom.copyRow.style.display = copyArray.length ? "flex" : "none";
-      if (activeCategory === "matrix") return renderMatrix();
+      if (activeCategory === "matrix") { renderTrace(); return renderMatrix(); }
       const startLeft = windowRange ? 6 + windowRange.left * 80 : 0;
       const width = windowRange ? (windowRange.right - windowRange.left + 1) * 80 - 8 : 0;
       dom.arrayRow.innerHTML = (windowRange ? `<div class="window-band" style="left:${startLeft}px;width:${width}px"><span>window</span></div>` : "") + arr.map((v,i)=>`
         <div class="array-item-wrap">
           ${showMemory ? `<div class="memory">0x${(0x2A00 + i*4).toString(16).toUpperCase()}</div>` : ""}
           ${prefixArray[i] !== undefined ? `<div class="prefix-badge">${prefixArray[i]}</div>` : ""}
-          <div class="array-cell ${states[i]||''}">${displayValue(v)}</div>
+          <div class="array-cell ${states[i]||''} ${windowRange && i >= windowRange.left && i <= windowRange.right ? 'in-window' : ''} ${prefixArray[i] !== undefined ? 'prefix-ready' : ''}">${displayValue(v)}</div>
           <div class="index-badge">[${i}]</div>
           ${Object.entries(pointers).filter(([,idx])=>idx===i).map(([name])=>`<div class="pointer ${name.includes('right')||name==='high'?'right-pointer':''}">${name}</div>`).join("")}
         </div>`).join("");
       dom.copyRow.innerHTML = copyArray.map((v,i)=>`<div class="array-item-wrap"><div class="array-cell inserted">${displayValue(v)}</div><div class="index-badge">copy[${i}]</div></div>`).join("");
+      renderTrace();
+    }
+    function renderTrace(){
+      const visible = traceState && (["two","window","prefix"].includes(activeCategory) || traceState.force);
+      if (!visible) { dom.tracePanel.style.display = "none"; dom.tracePanel.innerHTML = ""; return; }
+      dom.tracePanel.style.display = "grid";
+      dom.tracePanel.innerHTML = `
+        <div class="trace-head"><strong>${traceState.title}</strong><span>${traceState.subtitle || activeOp}</span></div>
+        <div class="trace-cards">${traceState.cards.map(([label,value])=>`<div class="trace-card"><span>${label}</span><strong>${value}</strong></div>`).join("")}</div>
+        <div class="trace-formula">${traceState.formula}</div>`;
     }
     function renderMatrix(active=[]){
       const activeSet = new Set(active.map(x=>x.join(",")));
@@ -495,12 +686,12 @@
     }
     function renderStats(){
       const sum = arr.reduce((a,b)=>a+b,0), sorted = arr.every((v,i)=>!i || arr[i-1] <= v);
-      const stats = [["Length", arr.length], ["Min", arr.length?Math.min(...arr):"-"], ["Max", arr.length?Math.max(...arr):"-"], ["Sum", sum], ["Average", arr.length?(sum/arr.length).toFixed(2):"-"], ["Sorted", sorted?"✅":"❌"]];
+      const stats = [["Length", arr.length], ["Min", arr.length?Math.min(...arr):"-"], ["Max", arr.length?Math.max(...arr):"-"], ["Sum", sum], ["Average", arr.length?(sum/arr.length).toFixed(2):"-"], ["Sorted", sorted?"Yes":"No"]];
       dom.statsBar.innerHTML = stats.map(([k,v])=>`<div class="stat-card"><span>${k}</span><strong>${v}</strong></div>`).join("");
     }
     function renderInfo(){
       const info = opInfo[activeOp] || opInfo[activeOp.replace(" Array","")] || ["Array Operation","Interactive array operation with synced animation.","O(n)","O(1)","O(1)","O(n)"];
-      dom.operationName.innerHTML = `${info[0]} <span class="mini-button active" style="padding:5px 8px">💼 FAANG</span>`;
+      dom.operationName.innerHTML = `${info[0]} <span class="mini-button active" style="padding:5px 8px">Useful pattern</span>`;
       dom.operationDescription.textContent = info[1];
       dom.metricsBody.innerHTML = [["Array Size",arr.length],["Comparisons",metrics.comparisons],["Swaps",metrics.swaps],["Time Elapsed",`${metrics.elapsed}ms`]].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("");
       dom.complexityBadges.innerHTML = `<div class="complexity-pill">Time: ${info[2]}</div><div class="complexity-pill">Space: ${info[3]}</div><div class="complexity-pill">Best: ${info[4]}</div><div class="complexity-pill">Worst: ${info[5]}</div>`;
@@ -510,7 +701,7 @@
     function renderPseudo(){ const lines = pseudocode[activeOp] || pseudocode[activeOp.replace(" Array","")] || pseudocode.default; dom.pseudoCode.innerHTML = lines.map((l,i)=>`<span class="pseudo-line ${i===currentLine?'active':''}"><span>${String(i+1).padStart(2,"0")}</span><span>${l}</span></span>`).join(""); }
     function renderCodeTabs(){ dom.codeTabs.innerHTML = Object.keys(codeSamples).map(k=>`<button class="tab-button${k===activeCode?' active':''}" data-code="${k}">${k}</button>`).join(""); }
     function renderCode(){ dom.codeTitle.textContent = `${activeCode} Implementation`; dom.codeBlock.textContent = codeSamples[activeCode]; }
-    function resetVisual(){ states={}; pointers={}; windowRange=null; prefixArray=[]; copyArray=[]; currentLine=null; stepIndex=0; steps=[]; playing=false; metrics={comparisons:0,swaps:0,started:0,elapsed:0}; dom.stepCounter.textContent="0 / 0"; renderAll(); }
+    function resetVisual(){ states={}; pointers={}; windowRange=null; prefixArray=[]; copyArray=[]; traceState=null; currentLine=null; stepIndex=0; steps=[]; playing=false; metrics={comparisons:0,swaps:0,started:0,elapsed:0}; dom.stepCounter.textContent="0 / 0"; renderAll(); }
     function step(type,data={},line=0,explain=""){ return {type,data,line,explain}; }
     function buildSteps(action="main"){
       const val = +(document.getElementById("valueInput")?.value || document.getElementById("targetInput")?.value || document.getElementById("kInput")?.value || 0);
@@ -528,32 +719,53 @@
       else if(op.includes("Binary")){ work.sort((a,b)=>a-b); s.push(step("set",{arr:[...work]},0,"Auto-sorted array for binary search")); let low=0,high=work.length-1; while(low<=high){let mid=Math.floor((low+high)/2); const dim=Object.fromEntries(work.map((_,i)=>[i,i<low||i>high?"dim":i===mid?"current":""])); s.push(step("mark",{states:dim,pointers:{low,mid,high}},3,`LOW=${low}, MID=${mid}, HIGH=${high}. arr[mid]=${work[mid]}`)); if(work[mid]===val){s.push(step("mark",{states:{[mid]:"found"},pointers:{low,mid,high}},4,`Found target at ${mid}`)); break;} work[mid]<val?low=mid+1:high=mid-1;}}
       else if(op==="Jump Search"){ const jump=Math.ceil(Math.sqrt(work.length)); for(let i=0;i<work.length;i+=jump)s.push(step("mark",{states:{[i]:"comparing"},pointers:{jump:i},metric:"compare"},1,`Jumping to index ${i}`)); }
       else if(op==="Interpolation Search"){ const pos=Math.min(work.length-1,Math.max(0,Math.floor((val-Math.min(...work))/(Math.max(...work)-Math.min(...work)||1)*(work.length-1)))); s.push(step("mark",{states:{[pos]:"current"},pointers:{pos}},1,`pos = low + [(target-arr[low])/(arr[high]-arr[low])] × (high-low) = ${pos}`)); }
-      else if(op==="Two Sum"){ work.sort((a,b)=>a-b); s.push(step("set",{arr:[...work]},0,"Sorted array for two-sum two pointers")); let left=0,right=work.length-1; while(left<right){let sum=work[left]+work[right]; s.push(step("mark",{states:{[left]:"left",[right]:"right"},pointers:{left,rightPointer:right}},3,`Current Sum: ${sum}`)); if(sum===val){s.push(step("mark",{states:{[left]:"found",[right]:"found"}},4,`Pair found: ${work[left]} + ${work[right]} = ${val}`)); break;} sum<val?left++:right--;}}
-      else if(op==="Remove Duplicates"){ work.sort((a,b)=>a-b); let slow=0; for(let fast=1;fast<work.length;fast++){s.push(step("mark",{states:{[slow]:"left",[fast]:"current"},pointers:{slow,fast}},2,`Compare unique arr[${slow}] with arr[${fast}]`)); if(work[fast]!==work[slow])slow++;} }
-      else if(op==="Container With Most Water"){ let left=0,right=work.length-1,best=0; while(left<right){let area=(right-left)*Math.min(work[left],work[right]); best=Math.max(best,area); s.push(step("mark",{states:{[left]:"left",[right]:"right"},pointers:{left,rightPointer:right}},2,`Current Area: ${area} | Best: ${best}`)); work[left]<work[right]?left++:right--;}}
-      else if(op==="Move Zeroes"){ for(let i=0,last=0;i<work.length;i++){s.push(step("mark",{states:{[i]:"current",[last]:"left"},pointers:{scan:i,nonzero:last}},1,`Scan pointer at ${i}`)); if(work[i]!==0){[work[i],work[last]]=[work[last],work[i]]; s.push(step("set",{arr:[...work],states:{[i]:"swapping",[last]:"swapping"},metric:"swap"},2,"Moved non-zero forward")); last++;}}}
-      else if(op==="Palindrome Check"){ let left=0,right=work.length-1; while(left<right){s.push(step("mark",{states:{[left]:"left",[right]:"right"},pointers:{left,rightPointer:right}},1,work[left]===work[right]?"Match":"Mismatch")); left++; right--;}}
-      else if(op.includes("Window")||op==="Max Sum Subarray"||op==="Fixed Window"){ const k=Math.max(1,Math.min(val||3,work.length)); let sum=work.slice(0,k).reduce((a,b)=>a+b,0),max=sum,best=[0,k-1]; s.push(step("mark",{window:[0,k-1]},1,`Current: ${sum} | Maximum: ${max}`)); for(let i=k;i<work.length;i++){sum+=work[i]-work[i-k]; if(sum>max){max=sum; best=[i-k+1,i];} s.push(step("mark",{window:[i-k+1,i],states:{[i]:"current",[i-k]:"dim"}},4,`Adding arr[${i}]=${work[i]}, Removing arr[${i-k}]=${work[i-k]}. Current: ${sum} | Maximum: ${max}`));} s.push(step("mark",{window:best},6,`Maximum window sum = ${max}`));}
-      else if(op==="Longest Subarray"||op==="Variable Window"||op==="Minimum Window Substring"){ let left=0,sum=0,best=0,limit=val||15; for(let right=0;right<work.length;right++){sum+=work[right]; while(sum>limit&&left<=right)sum-=work[left++]; best=Math.max(best,right-left+1); s.push(step("mark",{window:[left,right],pointers:{left,rightPointer:right}},1,`Window length ${right-left+1}, best ${best}`));}}
-      else if(op==="Build Prefix Sum"){ let run=0,p=[]; work.forEach((x,i)=>{run+=x;p[i]=run;s.push(step("mark",{prefix:[...p],states:{[i]:"current"}},3,`prefix[${i}] = ${run}`));});}
-      else if(op==="Range Query"){ const p=[]; work.reduce((a,b,i)=>(p[i]=a+b,p[i]),0); const ans=p[r]-(l?p[l-1]:0); s.push(step("mark",{prefix:p,window:[l,r]},1,`sum(${l},${r}) = prefix[${r}] - prefix[${l-1}] = ${ans}`));}
-      else if(op==="Subarray Sum = K"){ const target=val||10; for(let i=0;i<work.length;i++){let sum=0; for(let j=i;j<work.length;j++){sum+=work[j]; if(sum===target)s.push(step("mark",{window:[i,j]},1,`Subarray [${i}..${j}] sums to ${target}`));}}}
+      else if(op==="Two Sum"){ work.sort((a,b)=>a-b); s.push(step("set",{arr:[...work],trace:{title:"Two Pointers",subtitle:"Sorted first",cards:[["target",val],["left","0"],["right",work.length-1],["sum","-"]],formula:"Sort array, then move left/right inward based on current sum."}},0,"Sorted array for two-sum two pointers")); let left=0,right=work.length-1; while(left<right){let sum=work[left]+work[right]; const move=sum===val?"match":sum<val?"sum too small: left++":"sum too large: right--"; s.push(step("mark",{states:{[left]:"left",[right]:"right"},pointers:{left,rightPointer:right},window:[left,right],trace:{title:"Two Pointers",subtitle:"Two Sum",cards:[["left",`${left} -> ${work[left]}`],["right",`${right} -> ${work[right]}`],["sum",sum],["target",val]],formula:`arr[left] + arr[right] = ${work[left]} + ${work[right]} = ${sum}. ${move}.`}},3,`Current Sum: ${sum}`)); if(sum===val){s.push(step("mark",{states:{[left]:"found",[right]:"found"},window:[left,right],trace:{title:"Two Pointers",subtitle:"Pair found",cards:[["left",left],["right",right],["pair",`${work[left]} + ${work[right]}`],["target",val]],formula:`Pair found because ${sum} == ${val}.`}},4,`Pair found: ${work[left]} + ${work[right]} = ${val}`)); break;} sum<val?left++:right--;}}
+      else if(op==="Three Sum"){ work.sort((a,b)=>a-b); s.push(step("set",{arr:[...work],trace:{title:"Two Pointers",subtitle:"Three Sum setup",cards:[["target",val],["fixed i","-"],["left","-"],["right","-"]],formula:"Fix one index, then solve Two Sum on the remaining range."}},0,"Sorted array for three-sum two pointers")); outer: for(let i=0;i<work.length-2;i++){let left=i+1,right=work.length-1; while(left<right){const sum=work[i]+work[left]+work[right]; const move=sum===val?"match":sum<val?"left++":"right--"; s.push(step("mark",{states:{[i]:"current",[left]:"left",[right]:"right"},pointers:{i,left,rightPointer:right},window:[i,right],trace:{title:"Two Pointers",subtitle:"Three Sum",cards:[["i",`${i} -> ${work[i]}`],["left",`${left} -> ${work[left]}`],["right",`${right} -> ${work[right]}`],["sum",sum]],formula:`${work[i]} + ${work[left]} + ${work[right]} = ${sum}; ${move}.`}},3,`Three Sum check: ${sum}`)); if(sum===val){s.push(step("mark",{states:{[i]:"found",[left]:"found",[right]:"found"},window:[i,right],trace:{title:"Two Pointers",subtitle:"Triplet found",cards:[["i",i],["left",left],["right",right],["target",val]],formula:`Triplet found: ${work[i]} + ${work[left]} + ${work[right]} = ${val}.`}},4,"Triplet found")); break outer;} sum<val?left++:right--;}}}
+      else if(op==="Remove Duplicates"){ work.sort((a,b)=>a-b); let slow=0; for(let fast=1;fast<work.length;fast++){const unique=work[fast]!==work[slow]; s.push(step("mark",{states:{[slow]:"left",[fast]:"current"},pointers:{slow,fast},window:[slow,fast],trace:{title:"Two Pointers",subtitle:"Remove Duplicates",cards:[["slow",`${slow} -> ${work[slow]}`],["fast",`${fast} -> ${work[fast]}`],["unique?",unique?"yes":"no"],["next",unique?"slow++":"skip"]],formula:`Compare arr[slow] and arr[fast]. ${unique?"New unique value found.":"Duplicate value, keep scanning."}`}},2,`Compare unique arr[${slow}] with arr[${fast}]`)); if(unique)slow++;} }
+      else if(op==="Container With Most Water"){ let left=0,right=work.length-1,best=0; while(left<right){let area=(right-left)*Math.min(work[left],work[right]); best=Math.max(best,area); const move=work[left]<work[right]?"left++":"right--"; s.push(step("mark",{states:{[left]:"left",[right]:"right"},pointers:{left,rightPointer:right},window:[left,right],trace:{title:"Two Pointers",subtitle:"Container With Most Water",cards:[["width",right-left],["height",Math.min(work[left],work[right])],["area",area],["best",best]],formula:`area = (${right} - ${left}) * min(${work[left]}, ${work[right]}) = ${area}; move ${move}.`}},2,`Current Area: ${area} | Best: ${best}`)); work[left]<work[right]?left++:right--;}}
+      else if(op==="Move Zeroes"){ for(let i=0,last=0;i<work.length;i++){s.push(step("mark",{states:{[i]:"current",[last]:"left"},pointers:{scan:i,nonzero:last},window:[last,i],trace:{title:"Two Pointers",subtitle:"Move Zeroes",cards:[["scan",`${i} -> ${work[i]}`],["nonzero slot",last],["action",work[i]!==0?"swap":"skip"],["array length",work.length]],formula:work[i]!==0?`arr[${i}] is non-zero, swap it into position ${last}.`:`arr[${i}] is zero, scan moves ahead.`}},1,`Scan pointer at ${i}`)); if(work[i]!==0){[work[i],work[last]]=[work[last],work[i]]; s.push(step("set",{arr:[...work],states:{[i]:"swapping",[last]:"swapping"},pointers:{scan:i,nonzero:last},window:[last,i],metric:"swap",trace:{title:"Two Pointers",subtitle:"Move Zeroes",cards:[["scan",i],["nonzero slot",last],["moved",work[last]],["swaps",metrics.swaps+1]],formula:`Non-zero moved forward; next nonzero slot becomes ${last+1}.`}},2,"Moved non-zero forward")); last++;}}}
+      else if(op==="Palindrome Check"){ let left=0,right=work.length-1; while(left<right){const ok=work[left]===work[right]; s.push(step("mark",{states:{[left]:"left",[right]:"right"},pointers:{left,rightPointer:right},window:[left,right],trace:{title:"Two Pointers",subtitle:"Palindrome Check",cards:[["left",`${left} -> ${work[left]}`],["right",`${right} -> ${work[right]}`],["match?",ok?"yes":"no"],["next","inward"]],formula:`Compare outer values: ${work[left]} ${ok?"==":"!="} ${work[right]}.`}},1,ok?"Match":"Mismatch")); left++; right--;}}
+      else if(op.includes("Window")||op==="Max Sum Subarray"||op==="Fixed Window"){ const k=Math.max(1,Math.min(val||3,work.length)); let sum=work.slice(0,k).reduce((a,b)=>a+b,0),max=sum,best=[0,k-1]; s.push(step("mark",{window:[0,k-1],states:Object.fromEntries(Array.from({length:k},(_,i)=>[i,"current"])),trace:{title:"Sliding Window",subtitle:"Initial fixed window",cards:[["k",k],["left",0],["right",k-1],["sum",sum]],formula:`Initial window sum = ${work.slice(0,k).join(" + ")} = ${sum}.`}},1,`Current: ${sum} | Maximum: ${max}`)); for(let i=k;i<work.length;i++){const outgoing=work[i-k], incoming=work[i]; sum+=incoming-outgoing; if(sum>max){max=sum; best=[i-k+1,i];} const left=i-k+1,right=i; s.push(step("mark",{window:[left,right],states:{[i]:"current",[i-k]:"dim"},pointers:{left,rightPointer:right},trace:{title:"Sliding Window",subtitle:"Slide one step",cards:[["add",`arr[${i}]=${incoming}`],["remove",`arr[${i-k}]=${outgoing}`],["current sum",sum],["best",max]],formula:`newSum = oldSum + ${incoming} - ${outgoing} = ${sum}.`}},4,`Adding arr[${i}]=${incoming}, Removing arr[${i-k}]=${outgoing}. Current: ${sum} | Maximum: ${max}`));} s.push(step("mark",{window:best,states:Object.fromEntries(Array.from({length:best[1]-best[0]+1},(_,n)=>[best[0]+n,"best"])),trace:{title:"Sliding Window",subtitle:"Best window",cards:[["left",best[0]],["right",best[1]],["max sum",max],["k",k]],formula:`Maximum window is [${best[0]}..${best[1]}] with sum ${max}.`}},6,`Maximum window sum = ${max}`));}
+      else if(op==="Longest Subarray"||op==="Variable Window"||op==="Minimum Window Substring"){ let left=0,sum=0,best=0,limit=val||15; for(let right=0;right<work.length;right++){sum+=work[right]; let removed=[]; while(sum>limit&&left<=right){removed.push(work[left]); sum-=work[left++];} best=Math.max(best,right-left+1); s.push(step("mark",{window:[left,right],pointers:{left,rightPointer:right},states:{[right]:"current",[left]:"left"},trace:{title:"Sliding Window",subtitle:"Variable window",cards:[["left",left],["right",right],["sum",sum],["best length",best]],formula:`Expand right, then shrink while sum > ${limit}. Removed: ${removed.length?removed.join(", "):"none"}.`}},1,`Window length ${right-left+1}, best ${best}`));}}
+      else if(op==="Build Prefix Sum"){ let run=0,p=[]; work.forEach((x,i)=>{const previous=i?p[i-1]:0; run+=x;p[i]=run;s.push(step("mark",{prefix:[...p],states:{[i]:"current"},pointers:{i},trace:{title:"Prefix Sum",subtitle:"Build running totals",cards:[["i",i],["arr[i]",x],["prefix[i-1]",previous],["prefix[i]",run]],formula:`prefix[${i}] = ${previous} + ${x} = ${run}.`}},3,`prefix[${i}] = ${run}`));});}
+      else if(op==="Range Query"){ const p=[]; work.reduce((a,b,i)=>(p[i]=a+b,p[i]),0); const safeL=Math.max(0,Math.min(l,work.length-1)), safeR=Math.max(safeL,Math.min(r,work.length-1)); const leftPart=safeL?p[safeL-1]:0; const ans=p[safeR]-leftPart; s.push(step("mark",{prefix:p,window:[safeL,safeR],states:{[safeL]:"left",[safeR]:"right"},pointers:{left:safeL,rightPointer:safeR},trace:{title:"Prefix Sum",subtitle:"Range Query",cards:[["left",safeL],["right",safeR],["prefix[right]",p[safeR]],["answer",ans]],formula:`sum(${safeL}, ${safeR}) = prefix[${safeR}] - prefix[${safeL-1}] = ${p[safeR]} - ${leftPart} = ${ans}.`}},1,`sum(${safeL},${safeR}) = ${ans}`));}
+      else if(op==="Subarray Sum = K"){ const target=val||10; let found=false; for(let i=0;i<work.length;i++){let sum=0; for(let j=i;j<work.length;j++){sum+=work[j]; s.push(step("mark",{window:[i,j],states:{[i]:"left",[j]:"right"},pointers:{start:i,end:j},trace:{title:"Prefix Sum",subtitle:"Subarray Sum = K",cards:[["start",i],["end",j],["current sum",sum],["target",target]],formula:`Add arr[${j}] = ${work[j]}; running subarray sum is ${sum}.`}},1,`Checking subarray [${i}..${j}] = ${sum}`)); if(sum===target){found=true; s.push(step("mark",{window:[i,j],states:Object.fromEntries(Array.from({length:j-i+1},(_,n)=>[i+n,"found"])),trace:{title:"Prefix Sum",subtitle:"Match found",cards:[["start",i],["end",j],["sum",sum],["target",target]],formula:`Subarray [${i}..${j}] sums to ${target}.`}},1,`Subarray [${i}..${j}] sums to ${target}`)); break;}} if(found)break;}}
       else if(op.includes("Rotate")){ const k=Math.abs(val||2)%work.length; const rotated=op==="Right Rotate"?work.slice(-k).concat(work.slice(0,-k)):work.slice(k).concat(work.slice(0,k)); s.push(step("mark",{window:[0,k-1]},1,`Step 1: first ${k} elements move`)); s.push(step("set",{arr:rotated},4,`${op} complete`));}
       else if(op==="Search in Rotated"){ s.push(step("mark",{states:{0:"left",[work.length-1]:"right"},pointers:{low:0,high:work.length-1}},2,"Identify sorted half and binary-search inside rotated array")); }
       else if(activeCategory==="matrix"){ return buildMatrixSteps(op); }
       return s.length?s:[step("mark",{states:{0:"current"}},0,`${op} demo complete`)];
     }
     function buildMatrixSteps(op){ const s=[]; const n=matrix.length; if(op==="Spiral Order"||op==="Traverse"){let top=0,bottom=n-1,left=0,right=n-1; while(top<=bottom&&left<=right){for(let c=left;c<=right;c++)s.push(step("matrix",{active:[[top,c]]},2,`Visit [${top}][${c}]`)); top++; for(let r=top;r<=bottom;r++)s.push(step("matrix",{active:[[r,right]]},2,`Visit [${r}][${right}]`)); right--; if(top<=bottom){for(let c=right;c>=left;c--)s.push(step("matrix",{active:[[bottom,c]]},2,`Visit [${bottom}][${c}]`)); bottom--;} if(left<=right){for(let r=bottom;r>=top;r--)s.push(step("matrix",{active:[[r,left]]},2,`Visit [${r}][${left}]`)); left++;}}} else if(op==="Rotate 90°"){let m=matrix.map((_,i)=>matrix.map(row=>row[i]).reverse()); s.push(step("matrixSet",{matrix:m},1,"Formula: [i][j] → [j][n-1-i]"));} else if(op==="Transpose"){let m=matrix.map(r=>[...r]); for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){s.push(step("matrix",{active:[[i,j],[j,i]]},1,`Swap [${i}][${j}] with [${j}][${i}]`)); [m[i][j],m[j][i]]=[m[j][i],m[i][j]];} s.push(step("matrixSet",{matrix:m},2,"Transpose complete"));} else {s.push(step("matrix",{active:[[1,1]]},1,"Search cell highlighted"));} return s; }
-    function applyStep(st){ currentLine=st.line; if(st.data.arr) arr=[...st.data.arr]; if(st.data.matrix) matrix=st.data.matrix; states=st.data.states||{}; pointers=st.data.pointers||{}; windowRange=st.data.window?{left:st.data.window[0],right:st.data.window[1]}:null; prefixArray=st.data.prefix||prefixArray; copyArray=st.data.copy||copyArray; if(st.data.metric==="compare")metrics.comparisons++; if(st.data.metric==="swap")metrics.swaps++; metrics.elapsed=metrics.started?Date.now()-metrics.started:0; setStatus(st.explain); if(st.type==="matrix"||st.type==="matrixSet")renderMatrix(st.data.active||[]); renderArray(); renderInfo(); renderPseudo(); dom.stepCounter.textContent=`${stepIndex} / ${steps.length}`; }
-    function prepare(){ steps=buildSteps("main"); stepIndex=0; metrics={comparisons:0,swaps:0,started:Date.now(),elapsed:0}; states={}; pointers={}; prefixArray=[]; copyArray=[]; }
+    function applyStep(st){ currentLine=st.line; if(st.data.arr) arr=[...st.data.arr]; if(st.data.matrix) matrix=st.data.matrix; states=st.data.states||{}; pointers=st.data.pointers||{}; windowRange=st.data.window?{left:st.data.window[0],right:st.data.window[1]}:null; if(st.data.prefix !== undefined) prefixArray=st.data.prefix; if(st.data.copy !== undefined) copyArray=st.data.copy; traceState=st.data.trace||null; if(st.data.kadaneStatus) dom.kadaneStatus.textContent=st.data.kadaneStatus; if(st.data.metric==="compare")metrics.comparisons++; if(st.data.metric==="swap")metrics.swaps++; metrics.elapsed=metrics.started?Date.now()-metrics.started:0; setStatus(st.explain); if(st.type==="matrix"||st.type==="matrixSet")renderMatrix(st.data.active||[]); renderArray(); renderInfo(); renderPseudo(); dom.stepCounter.textContent=`${stepIndex} / ${steps.length}`; }
+    function prepare(){ steps=buildSteps("main"); stepIndex=0; metrics={comparisons:0,swaps:0,started:Date.now(),elapsed:0}; states={}; pointers={}; prefixArray=[]; copyArray=[]; traceState=null; }
     function stepForward(){ if(!steps.length)prepare(); if(stepIndex>=steps.length){playing=false; return false;} applyStep(steps[stepIndex]); stepIndex++; dom.stepCounter.textContent=`${stepIndex} / ${steps.length}`; return true; }
     async function play(){ if(playing){playing=false;return;} if(!steps.length||stepIndex>=steps.length)prepare(); playing=true; while(playing&&stepForward()) await sleep(delay()); playing=false; renderInfo(); }
-    function runAction(action){ steps=buildSteps(action); stepIndex=0; metrics={comparisons:0,swaps:0,started:Date.now(),elapsed:0}; play(); }
+    function runAction(action){ steps=buildSteps(action); stepIndex=0; metrics={comparisons:0,swaps:0,started:Date.now(),elapsed:0}; traceState=null; play(); }
     function setCategory(cat){ activeCategory=cat; activeOp=categories[cat].ops[0]; resetVisual(); }
     function setOperation(op){ activeOp=op; resetVisual(); }
     function setArray(values){ arr=values.slice(0,15); original=[...arr]; dom.sizeRange.value=arr.length||4; dom.sizeLabel.textContent=dom.sizeRange.value; resetVisual(); }
     function randomValues(n=+dom.sizeRange.value){ return Array.from({length:n},()=>Math.floor(Math.random()*21)-5); }
-    function runKadane(){ let cur=arr[0]||0, best=cur,start=0,bestRange=[0,0]; steps=[]; arr.forEach((v,i)=>{ if(i===0){cur=v;} else if(cur+v<v){cur=v;start=i;} else cur+=v; if(cur>best){best=cur;bestRange=[start,i];} steps.push(step("mark",{window:bestRange,states:{[i]:cur<0?"deleted":"current"}},1,`currentMax = max(${v}, previous + ${v}) = ${cur}. globalMax = ${best}`)); }); stepIndex=0; metrics.started=Date.now(); dom.kadaneStatus.textContent=`Current: ${cur} | Global Max: ${best}`; play(); }
+    function runKadane(){
+      activeCategory="window"; activeOp="Max Sum Subarray"; renderCategories(); renderOps(); renderControls();
+      let cur=0, best=-Infinity, start=0, bestRange=[0,0]; steps=[];
+      arr.forEach((v,i)=>{
+        const extend = i === 0 ? v : cur + v;
+        if(i===0 || extend < v){ cur=v; start=i; } else cur=extend;
+        if(cur>best){ best=cur; bestRange=[start,i]; }
+        const stateMap = {};
+        for(let n=start;n<=i;n++) stateMap[n] = "current";
+        for(let n=bestRange[0];n<=bestRange[1];n++) stateMap[n] = "best";
+        if(cur<0) stateMap[i] = "kadane-drop";
+        steps.push(step("mark",{
+          window:[start,i],
+          states:stateMap,
+          pointers:{start,end:i},
+          kadaneStatus:`Current: ${cur} | Global Max: ${best}`,
+          trace:{force:true,title:"Kadane Visualization",subtitle:"Maximum subarray",cards:[["index",i],["arr[i]",v],["currentMax",cur],["globalMax",best]],formula:`currentMax = max(arr[${i}], previous + arr[${i}]) = ${cur}; best range = [${bestRange[0]}..${bestRange[1]}].`}
+        },1,`currentMax = max(${v}, previous + ${v}) = ${cur}. globalMax = ${best}`));
+      });
+      stepIndex=0; metrics={comparisons:0,swaps:0,started:Date.now(),elapsed:0}; traceState=null; play();
+    }
     function init(){
       renderAll();
       dom.menuButton.onclick=()=>{const o=document.body.classList.toggle("menu-open");dom.menuButton.setAttribute("aria-expanded",String(o));};

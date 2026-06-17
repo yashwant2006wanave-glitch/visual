@@ -1016,15 +1016,153 @@
         grid-template-columns: 1fr;
       }
     }
+
+
+    /* Shared site shell: common nav/footer/closing bits without changing visualizer logic. */
+    .eyebrow {
+      margin: 0 0 0.45rem;
+      color: #f2a900;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .av-shell-footer {
+      margin-top: 0;
+      border-top: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(9, 15, 23, 0.94);
+      color: rgba(226, 232, 240, 0.78);
+    }
+    .av-footer-inner {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 34px;
+      display: grid;
+      gap: 16px;
+    }
+    .av-footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f8fafc;
+      font-weight: 900;
+      text-decoration: none;
+    }
+    .av-logo-mark {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #111827;
+      background: #f2a900;
+      font-family: "Fira Code", monospace;
+      font-size: 0.82rem;
+      box-shadow: 0 10px 24px rgba(242, 169, 0, 0.22);
+    }
+    .av-footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+    }
+    .av-footer-links a {
+      color: inherit;
+      text-decoration: none;
+      font-size: 0.92rem;
+    }
+    .av-footer-links a:hover { color: #f2a900; }
+    .av-footer-note {
+      margin: 0;
+      color: rgba(148, 163, 184, 0.92);
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+    .av-next-section {
+      width: min(1500px, calc(100% - 32px));
+      margin: 30px auto 0;
+      padding: 18px 20px;
+      border: 1px solid rgba(242, 169, 0, 0.34);
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(242, 169, 0, 0.11), rgba(15, 23, 42, 0.68));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      color: #e5e7eb;
+    }
+    .av-next-section p { margin: 0; color: rgba(226, 232, 240, 0.78); }
+    .av-next-section a {
+      color: #111827;
+      background: #f2a900;
+      text-decoration: none;
+      font-weight: 900;
+      border-radius: 8px;
+      padding: 10px 14px;
+      white-space: nowrap;
+    }
+    .av-next-kicker {
+      display: block;
+      color: #f2a900;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .av-badge-yes, .av-badge-no {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 900;
+    }
+    .av-badge-yes { color: #bbf7d0; background: rgba(22, 101, 52, 0.45); }
+    .av-badge-no { color: #fecaca; background: rgba(127, 29, 29, 0.45); }
+    .app-icon,
+    .app-card > span:first-child,
+    .pattern-card > span:first-child {
+      width: 38px;
+      height: 38px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(242, 169, 0, 0.14);
+      border: 1px solid rgba(242, 169, 0, 0.36);
+      color: #f2a900;
+      font-size: 0;
+    }
+    .app-icon::before,
+    .app-card > span:first-child::before,
+    .pattern-card > span:first-child::before {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border: 2px solid currentColor;
+      border-radius: 5px;
+      box-shadow: 6px 6px 0 -3px currentColor;
+      transform: rotate(-6deg);
+    }
+    .av-zoom-controls button,
+    .control-button,
+    .operation-button,
+    .btn-op,
+    .btn-traverse {
+      letter-spacing: 0;
+    }
+    @media (max-width: 768px) {
+      .av-next-section { align-items: flex-start; flex-direction: column; }
+      .av-next-section a { white-space: normal; }
+    }
+
   </style>
 </head>
 <body>
   <nav class="navbar" aria-label="Primary navigation">
     <div class="nav-inner">
-      <a class="logo" href="stack.html" aria-label="AlgoViz home">
-        <span class="logo-mark">AV</span>
-        <span>AlgoViz</span>
-      </a>
+      <a href="array.html" class="logo" aria-label="AlgoViz home"><span class="logo-mark" aria-hidden="true">AV</span><span>AlgoViz</span></a>
       <button class="hamburger" id="menuButton" type="button" aria-label="Open navigation" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -1042,8 +1180,9 @@
 
   <main class="page" id="top">
     <header class="hero">
+      <p class="eyebrow">Nodes and edges</p>
       <h1>Graph Visualizer</h1>
-      <p>Build graphs interactively and watch algorithms find paths in real time</p>
+      <p>Build a graph, then run the path and traversal algorithms on it.</p>
       <div class="pill-row" id="algorithmPills" aria-label="Algorithm selectors"></div>
       <div class="toggle-row" aria-label="Graph type toggles">
         <button class="toggle-button active" id="undirectedButton" type="button">Undirected</button>
@@ -1075,12 +1214,12 @@
               <g id="nodesLayer"></g>
             </g>
           </svg>
-          <div class="canvas-controls">
+          <div class="canvas-controls av-zoom-controls">
             <button class="canvas-button" id="zoomInButton" type="button" title="Zoom In">+</button>
             <button class="canvas-button" id="zoomOutButton" type="button" title="Zoom Out">-</button>
-            <button class="canvas-button" id="fitButton" type="button" title="Fit">FIT</button>
-            <button class="canvas-button" id="deleteButton" type="button" title="Delete selected">🗑️</button>
-            <button class="canvas-button" id="undoButton" type="button" title="Undo">↩</button>
+            <button class="canvas-button" id="fitButton" type="button" title="Fit">Fit</button>
+            <button class="canvas-button" id="deleteButton" type="button" title="Delete selected">Delete</button>
+            <button class="canvas-button" id="undoButton" type="button" title="Undo">Undo</button>
           </div>
           <div class="weight-popup" id="weightPopup">
             <input id="weightInput" type="number" min="1" max="99" value="1" aria-label="Edge weight">
@@ -1210,12 +1349,12 @@
             <tr><th>Algorithm</th><th>Time</th><th>Space</th><th>Shortest Path</th><th>Weighted</th><th>Use Case</th></tr>
           </thead>
           <tbody>
-            <tr data-algo="BFS"><td>BFS</td><td>O(V+E)</td><td>O(V)</td><td>✅ Unweighted</td><td>❌</td><td>Level traversal</td></tr>
-            <tr data-algo="DFS"><td>DFS</td><td>O(V+E)</td><td>O(V)</td><td>❌</td><td>❌</td><td>Cycle detect</td></tr>
-            <tr data-algo="Dijkstra"><td>Dijkstra</td><td>O((V+E)logV)</td><td>O(V)</td><td>✅ Weighted</td><td>✅</td><td>GPS routing</td></tr>
-            <tr data-algo="A*"><td>A*</td><td>O(E log V)</td><td>O(V)</td><td>✅ Optimal</td><td>✅</td><td>Game pathfinding</td></tr>
-            <tr data-algo="Prim's MST"><td>Prim's</td><td>O(E log V)</td><td>O(V)</td><td>N/A (MST)</td><td>✅</td><td>Network cables</td></tr>
-            <tr data-algo="Kruskal's MST"><td>Kruskal's</td><td>O(E log E)</td><td>O(V)</td><td>N/A (MST)</td><td>✅</td><td>Road construction</td></tr>
+            <tr data-algo="BFS"><td>BFS</td><td>O(V+E)</td><td>O(V)</td><td>Yes Unweighted</td><td>No</td><td>Level traversal</td></tr>
+            <tr data-algo="DFS"><td>DFS</td><td>O(V+E)</td><td>O(V)</td><td>No</td><td>No</td><td>Cycle detect</td></tr>
+            <tr data-algo="Dijkstra"><td>Dijkstra</td><td>O((V+E)logV)</td><td>O(V)</td><td>Yes Weighted</td><td>Yes</td><td>GPS routing</td></tr>
+            <tr data-algo="A*"><td>A*</td><td>O(E log V)</td><td>O(V)</td><td>Yes Optimal</td><td>Yes</td><td>Game pathfinding</td></tr>
+            <tr data-algo="Prim's MST"><td>Prim's</td><td>O(E log V)</td><td>O(V)</td><td>N/A (MST)</td><td>Yes</td><td>Network cables</td></tr>
+            <tr data-algo="Kruskal's MST"><td>Kruskal's</td><td>O(E log E)</td><td>O(V)</td><td>N/A (MST)</td><td>Yes</td><td>Road construction</td></tr>
           </tbody>
         </table>
       </div>
@@ -1224,29 +1363,38 @@
     <section class="section">
       <div class="section-header"><h2>Real World Applications</h2></div>
       <div class="apps">
-        <article class="app-card"><span>🗺️</span><h3>Google Maps</h3><p>Dijkstra and A* power shortest-route decisions across weighted road networks.</p></article>
-        <article class="app-card"><span>🌐</span><h3>Social Networks</h3><p>BFS expands by levels to discover nearby friends and mutual connections.</p></article>
-        <article class="app-card"><span>🔌</span><h3>Network Infrastructure</h3><p>Minimum spanning trees reduce cable and road construction costs.</p></article>
-        <article class="app-card"><span>🎮</span><h3>Game AI Pathfinding</h3><p>A* guides NPC movement with fast cost plus heuristic path decisions.</p></article>
+        <article class="app-card"><span></span><h3>Google Maps</h3><p>Dijkstra and A* power shortest-route decisions across weighted road networks.</p></article>
+        <article class="app-card"><span></span><h3>Social Networks</h3><p>BFS expands by levels to discover nearby friends and mutual connections.</p></article>
+        <article class="app-card"><span></span><h3>Network Infrastructure</h3><p>Minimum spanning trees reduce cable and road construction costs.</p></article>
+        <article class="app-card"><span></span><h3>Game AI Pathfinding</h3><p>A* guides NPC movement with fast cost plus heuristic path decisions.</p></article>
       </div>
     </section>
   </main>
+  <section class="av-next-section" aria-label="Next topic">
+    <div>
+      <span class="av-next-kicker">Next</span>
+      <strong>Explore Sorting Algorithms</strong>
+      <p>Graph search is about movement through edges. Sorting is the cleaner comparison lab.</p>
+    </div>
+    <a href="sorting.html">Open Sorting Algorithms</a>
+  </section>
 
-  <footer class="footer">
-    <div class="footer-inner">
-      <div>
-        <a class="logo" href="stack.html"><span class="logo-mark">AV</span><span>AlgoViz</span></a>
-        <div style="margin-top: 8px;">Visualize. Understand. Master.</div>
-        <div style="margin-top: 8px;">© 2025 AlgoViz. All rights reserved. Built with ❤️ by Yashwant Wanave</div>
-      </div>
-      <div class="footer-links">
+  <footer class="footer av-shell-footer">
+    <div class="av-footer-inner">
+      <a class="av-footer-brand" href="array.html" aria-label="AlgoViz home">
+        <span class="av-logo-mark">AV</span>
+        <span>AlgoViz</span>
+      </a>
+      <nav class="av-footer-links" aria-label="Footer navigation">
+        <a href="array.html">Arrays</a>
         <a href="stack.html">Stack</a>
         <a href="queue.html">Queue</a>
         <a href="linkedlist.html">Linked List</a>
         <a href="tree.html">Trees</a>
-        <a class="active" href="graph.html">Graphs</a>
+        <a href="graph.html">Graphs</a>
         <a href="sorting.html">Sorting</a>
-      </div>
+      </nav>
+      <p class="av-footer-note">Made by Yashwant Wanave. Small DSA visualizer notes, still adding the next pieces.</p>
     </div>
   </footer>
 
@@ -1261,10 +1409,10 @@
       "Kruskal's MST": { time: "O(E log E)", space: "O(V)", shortest: "N/A", weighted: "Yes", useCase: "Road construction" }
     };
     const tools = [
-      { id: "node", label: "✦ Add Node", instruction: "Click canvas to add node" },
-      { id: "edge", label: "↔ Add Edge", instruction: "Click source node, then target node" },
-      { id: "select", label: "☞ Select/Drag", instruction: "Drag nodes or select edges" },
-      { id: "delete", label: "🗑️ Delete", instruction: "Click a node or edge to delete it" }
+      { id: "node", label: "Add Node", instruction: "Click canvas to add node" },
+      { id: "edge", label: "Add Edge", instruction: "Click source node, then target node" },
+      { id: "select", label: "Select/Drag", instruction: "Drag nodes or select edges" },
+      { id: "delete", label: "Delete", instruction: "Click a node or edge to delete it" }
     ];
     const speedMap = [
       { label: "Slow", delay: 1000 },
@@ -2222,9 +2370,9 @@ class GraphAlgorithms {
       const items = [
         ["Nodes", stats.nodes],
         ["Edges", stats.edges],
-        ["Connected", stats.connected ? "✅" : "❌"],
-        ["Has Cycle", stats.hasCycle ? "✅" : "❌"],
-        ["Bipartite", stats.bipartite ? "✅" : "❌"],
+        ["Connected", stats.connected ? "Yes" : "No"],
+        ["Has Cycle", stats.hasCycle ? "Yes" : "No"],
+        ["Bipartite", stats.bipartite ? "Yes" : "No"],
         ["Mode", `${graphDirected ? "Directed" : "Undirected"} / ${graphWeighted ? "Weighted" : "Unweighted"}`]
       ];
       dom.statsGrid.innerHTML = items.map(([label, value]) => `<div class="stat-card"><span>${label}</span><strong>${value}</strong></div>`).join("");

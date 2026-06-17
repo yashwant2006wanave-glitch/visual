@@ -782,15 +782,153 @@
       .applications { grid-template-columns: 1fr; }
       .bar-value { display: none; }
     }
+
+
+    /* Shared site shell: common nav/footer/closing bits without changing visualizer logic. */
+    .eyebrow {
+      margin: 0 0 0.45rem;
+      color: #f2a900;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .av-shell-footer {
+      margin-top: 0;
+      border-top: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(9, 15, 23, 0.94);
+      color: rgba(226, 232, 240, 0.78);
+    }
+    .av-footer-inner {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 34px;
+      display: grid;
+      gap: 16px;
+    }
+    .av-footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f8fafc;
+      font-weight: 900;
+      text-decoration: none;
+    }
+    .av-logo-mark {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #111827;
+      background: #f2a900;
+      font-family: "Fira Code", monospace;
+      font-size: 0.82rem;
+      box-shadow: 0 10px 24px rgba(242, 169, 0, 0.22);
+    }
+    .av-footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+    }
+    .av-footer-links a {
+      color: inherit;
+      text-decoration: none;
+      font-size: 0.92rem;
+    }
+    .av-footer-links a:hover { color: #f2a900; }
+    .av-footer-note {
+      margin: 0;
+      color: rgba(148, 163, 184, 0.92);
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+    .av-next-section {
+      width: min(1500px, calc(100% - 32px));
+      margin: 30px auto 0;
+      padding: 18px 20px;
+      border: 1px solid rgba(242, 169, 0, 0.34);
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(242, 169, 0, 0.11), rgba(15, 23, 42, 0.68));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      color: #e5e7eb;
+    }
+    .av-next-section p { margin: 0; color: rgba(226, 232, 240, 0.78); }
+    .av-next-section a {
+      color: #111827;
+      background: #f2a900;
+      text-decoration: none;
+      font-weight: 900;
+      border-radius: 8px;
+      padding: 10px 14px;
+      white-space: nowrap;
+    }
+    .av-next-kicker {
+      display: block;
+      color: #f2a900;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .av-badge-yes, .av-badge-no {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 900;
+    }
+    .av-badge-yes { color: #bbf7d0; background: rgba(22, 101, 52, 0.45); }
+    .av-badge-no { color: #fecaca; background: rgba(127, 29, 29, 0.45); }
+    .app-icon,
+    .app-card > span:first-child,
+    .pattern-card > span:first-child {
+      width: 38px;
+      height: 38px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(242, 169, 0, 0.14);
+      border: 1px solid rgba(242, 169, 0, 0.36);
+      color: #f2a900;
+      font-size: 0;
+    }
+    .app-icon::before,
+    .app-card > span:first-child::before,
+    .pattern-card > span:first-child::before {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border: 2px solid currentColor;
+      border-radius: 5px;
+      box-shadow: 6px 6px 0 -3px currentColor;
+      transform: rotate(-6deg);
+    }
+    .av-zoom-controls button,
+    .control-button,
+    .operation-button,
+    .btn-op,
+    .btn-traverse {
+      letter-spacing: 0;
+    }
+    @media (max-width: 768px) {
+      .av-next-section { align-items: flex-start; flex-direction: column; }
+      .av-next-section a { white-space: normal; }
+    }
+
   </style>
 </head>
 <body>
   <nav class="navbar" id="top">
     <div class="nav-inner">
-      <a href="#top" class="logo" aria-label="AlgoViz home">
-        <span class="logo-mark" aria-hidden="true">AV</span>
-        <span>AlgoViz</span>
-      </a>
+      <a href="array.html" class="logo" aria-label="AlgoViz home"><span class="logo-mark" aria-hidden="true">AV</span><span>AlgoViz</span></a>
       <button class="hamburger" id="menuButton" type="button" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -801,7 +939,7 @@
         <li><a href="linkedlist.html">Linked List</a></li>
         <li><a href="tree.html">Trees</a></li>
         <li><a href="graph.html">Graphs</a></li>
-        <li><a class="active" href="#top">Sorting</a></li>
+        <li><a class="active" href="sorting.html">Sorting</a></li>
       </ul>
     </div>
   </nav>
@@ -810,7 +948,7 @@
     <header class="hero">
       <p class="eyebrow">Compare · Swap · Sort</p>
       <h1>Sorting Visualizer</h1>
-      <p>Compare, Swap, and Sort in Real Time</p>
+      <p>Watch comparisons and swaps change the array.</p>
       <div class="algorithm-tabs" id="algorithmTabs" aria-label="Sorting algorithms"></div>
     </header>
 
@@ -876,7 +1014,7 @@
         <button class="control-button" id="stepButton" type="button">Step Forward</button>
         <button class="control-button danger" id="resetButton" type="button">Reset</button>
       </div>
-      <div class="stats" id="mainStats"></div>
+      <div class="stats live-stats-panel" id="mainStats" aria-label="Live sorting stats"></div>
     </section>
 
     <section class="split-layout">
@@ -930,27 +1068,38 @@
         <h2>Real World Applications</h2>
       </div>
       <div class="applications">
-        <article class="app-card"><span class="app-icon">🗄️</span><h3>Database Indexing</h3><p>Merge sort handles external sorting when data is too large for memory.</p></article>
-        <article class="app-card"><span class="app-icon">🎮</span><h3>Game Leaderboards</h3><p>Quick sort ranks players fast when average-case performance matters.</p></article>
-        <article class="app-card"><span class="app-icon">📱</span><h3>Contact Lists</h3><p>Insertion sort is efficient for small or nearly sorted collections.</p></article>
-        <article class="app-card"><span class="app-icon">🔍</span><h3>Search Engines</h3><p>Heap sort powers top-K result selection and priority-driven ranking.</p></article>
+        <article class="app-card"><span class="app-icon"></span><h3>Database Indexing</h3><p>Merge sort handles external sorting when data is too large for memory.</p></article>
+        <article class="app-card"><span class="app-icon"></span><h3>Game Leaderboards</h3><p>Quick sort ranks players fast when average-case performance matters.</p></article>
+        <article class="app-card"><span class="app-icon"></span><h3>Contact Lists</h3><p>Insertion sort is efficient for small or nearly sorted collections.</p></article>
+        <article class="app-card"><span class="app-icon"></span><h3>Search Engines</h3><p>Heap sort powers top-K result selection and priority-driven ranking.</p></article>
       </div>
     </section>
   </main>
+  <section class="av-next-section" aria-label="Next topic">
+    <div>
+      <span class="av-next-kicker">Next</span>
+      <strong>Explore Arrays</strong>
+      <p>Sorting works on arrays, so this loops back to the base structure.</p>
+    </div>
+    <a href="array.html">Open Arrays</a>
+  </section>
 
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-logo">AlgoViz</div>
-      <p class="footer-tagline">Visualize. Understand. Master.</p>
-      <nav class="footer-nav" aria-label="Footer navigation">
+  <footer class="footer av-shell-footer">
+    <div class="av-footer-inner">
+      <a class="av-footer-brand" href="array.html" aria-label="AlgoViz home">
+        <span class="av-logo-mark">AV</span>
+        <span>AlgoViz</span>
+      </a>
+      <nav class="av-footer-links" aria-label="Footer navigation">
+        <a href="array.html">Arrays</a>
         <a href="stack.html">Stack</a>
         <a href="queue.html">Queue</a>
         <a href="linkedlist.html">Linked List</a>
         <a href="tree.html">Trees</a>
         <a href="graph.html">Graphs</a>
-        <a href="#top">Sorting</a>
+        <a href="sorting.html">Sorting</a>
       </nav>
-      <p class="footer-copy">&copy; 2025 AlgoViz. All rights reserved.</p>
+      <p class="av-footer-note">Made by Yashwant Wanave. Small DSA visualizer notes, still adding the next pieces.</p>
     </div>
   </footer>
 
