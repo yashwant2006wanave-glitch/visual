@@ -13,8 +13,40 @@
       "destination": "/queue.html"
     },
     {
+      "source": "/array",
+      "destination": "/array.html"
+    },
+    {
+      "source": "/arrays",
+      "destination": "/array.html"
+    },
+    {
       "source": "/sorting",
       "destination": "/sorting.html"
+    },
+    {
+      "source": "/linkedlist",
+      "destination": "/linkedlist.html"
+    },
+    {
+      "source": "/linked-list",
+      "destination": "/linkedlist.html"
+    },
+    {
+      "source": "/tree",
+      "destination": "/tree.html"
+    },
+    {
+      "source": "/trees",
+      "destination": "/tree.html"
+    },
+    {
+      "source": "/graph",
+      "destination": "/graph.html"
+    },
+    {
+      "source": "/graphs",
+      "destination": "/graph.html"
     }
   ]
 }

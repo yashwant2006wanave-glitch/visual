@@ -1,0 +1,3632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linked List Visualizer | AlgoViz</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS VARIABLES */
+        :root {
+            --bg-color: #0f172a;
+            --bg-card: #1e293b;
+            --border-color: #334155;
+            --accent-color: #6366f1;
+            --secondary-color: #22d3ee;
+            --text-color: #e2e8f0;
+            --text-muted: #94a3b8;
+            --head-color: #22c55e;
+            --tail-color: #f59e0b;
+            --null-color: #ef4444;
+            --success-glow: rgba(34, 197, 94, 0.4);
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --danger-glow: rgba(239, 68, 68, 0.4);
+            --cyan-glow: rgba(34, 211, 238, 0.4);
+            
+            --transition-speed: 0.3s;
+        }
+
+        /* RESET & BASE */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(rgba(99, 102, 241, 0.1) 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button, input, select {
+            font-family: inherit;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo-mark {
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 8px;
+            font-size: 1.25rem;
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, #fff, #a5b4fc); 
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: color var(--transition-speed);
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-color);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-links .active-link {
+            color: var(--accent-color);
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background-color: var(--text-color);
+            transition: 0.3s;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            text-align: center;
+            padding: 2.5rem 1rem 1rem 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* LIST TYPE TOGGLES */
+        .type-toggles {
+            display: inline-flex;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 0.35rem;
+            border-radius: 50px;
+            gap: 0.25rem;
+        }
+
+        .type-toggle-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .type-toggle-btn:hover {
+            color: var(--text-color);
+        }
+
+        .type-toggle-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        /* MAIN LAYOUT */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        /* VISUALIZATION PANEL */
+        .viz-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .viz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 0.75rem;
+        }
+
+        .viz-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .viz-canvas-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            position: relative;
+            padding: 4rem 1rem 5rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .viz-canvas {
+            display: flex;
+            align-items: center;
+            gap: 0px; /* Space managed by arrow width */
+            margin: 0 auto; /* Center list if fits, otherwise scrollable */
+            position: relative;
+        }
+
+        /* POINTER FLOAT CONTAINER */
+        .pointer-floats {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            pointer-events: none;
+        }
+
+        .pointer-badge {
+            position: absolute;
+            bottom: -35px;
+            transform: translateX(-50%);
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'Fira Code', monospace;
+            background: #0f172a;
+            border: 1px solid;
+            color: white;
+            transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .pointer-badge::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            background: #0f172a;
+            border-left: 1px solid;
+            border-top: 1px solid;
+        }
+
+        .pointer-badge.ptr-prev {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+        .pointer-badge.ptr-prev::before { border-color: var(--secondary-color); }
+        
+        .pointer-badge.ptr-curr {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        .pointer-badge.ptr-curr::before { border-color: var(--accent-color); }
+        
+        .pointer-badge.ptr-next {
+            border-color: #e2e8f0;
+            color: #e2e8f0;
+        }
+        .pointer-badge.ptr-next::before { border-color: #e2e8f0; }
+
+        /* CIRCULAR ARROW CONTAINER */
+        .circular-svg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* NODE CONTAINER */
+        .node-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            animation: nodeEnter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            z-index: 2;
+        }
+
+        .node-badge-container {
+            position: absolute;
+            top: -45px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            width: 150px;
+        }
+
+        .node-index {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .node-ptr-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            display: inline-block;
+        }
+
+        .label-head {
+            background-color: var(--head-color);
+            color: #052e16;
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+        }
+
+        .label-tail {
+            background-color: var(--tail-color);
+            color: #78350f;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+        }
+
+        /* NODE CARD */
+        .node-card {
+            width: 140px;
+            height: 80px;
+            background: linear-gradient(135deg, #1e293b, #0f2044);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .node-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-color);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .node-card.active-node {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+            animation: pulseActive 1.5s infinite;
+        }
+
+        .node-card.found-node {
+            border-color: var(--head-color) !important;
+            box-shadow: 0 0 25px var(--success-glow) !important;
+            transform: scale(1.05) translateY(-4px);
+        }
+
+        .node-card.delete-active {
+            border-color: var(--null-color) !important;
+            box-shadow: 0 0 25px var(--danger-glow) !important;
+            animation: shake 0.5s infinite;
+        }
+
+        .node-card.trail-node {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 12px rgba(34, 211, 238, 0.2);
+        }
+
+        /* NODE PARTS */
+        .node-data {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .node-link {
+            width: 45px;
+            background: rgba(0,0,0,0.2);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: var(--secondary-color);
+            font-family: 'Fira Code', monospace;
+            font-weight: 500;
+        }
+
+        .node-prev {
+            width: 45px;
+            background: rgba(0,0,0,0.2);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: var(--secondary-color);
+            font-family: 'Fira Code', monospace;
+            font-weight: 500;
+        }
+
+        .node-card.doubly-node {
+            width: 170px;
+        }
+
+        /* ARROW WRAPPER */
+        .arrow-container {
+            width: 70px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .arrow-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        /* SVG Arrow styles */
+        .arrow-line {
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+        }
+
+        .arrow-line.forward {
+            stroke: var(--accent-color);
+            stroke-dasharray: 6 4;
+            animation: flowForward 0.6s linear infinite;
+        }
+
+        .arrow-line.backward {
+            stroke: var(--secondary-color);
+            stroke-dasharray: 6 4;
+            animation: flowBackward 0.6s linear infinite;
+        }
+
+        .arrow-line.reversed {
+            stroke: var(--secondary-color) !important;
+            stroke-dasharray: 6 4;
+            animation: flowBackward 0.6s linear infinite;
+        }
+
+        .arrow-head {
+            fill: var(--accent-color);
+        }
+
+        .arrow-head.backward {
+            fill: var(--secondary-color);
+        }
+
+        .arrow-head.reversed {
+            fill: var(--secondary-color) !important;
+        }
+
+        /* NULL PILL */
+        .null-pill {
+            background-color: var(--null-color);
+            color: #fef2f2;
+            padding: 0.4rem 0.9rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            letter-spacing: 0.05em;
+            animation: nodeEnter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            z-index: 2;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            width: 100%;
+        }
+
+        .ghost-node {
+            width: 140px;
+            height: 80px;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        /* TOOLTIP POPUP */
+        .node-tooltip {
+            position: absolute;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-color);
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .node-tooltip span strong {
+            color: var(--secondary-color);
+        }
+
+        /* COMPARE POPUP DURING SEARCH */
+        .comparison-tooltip {
+            position: absolute;
+            top: -45px;
+            background: var(--accent-color);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            animation: bounceIn 0.3s forwards;
+            pointer-events: none;
+        }
+
+        /* CONTROLS PANEL */
+        .controls-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            width: 100%;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .input-box {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+            width: 130px;
+            outline: none;
+            transition: border-color var(--transition-speed);
+        }
+
+        .input-box:focus {
+            border-color: var(--accent-color);
+        }
+
+        .input-box.pos-input {
+            width: 180px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 0.6rem 1.1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .btn-accent {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-accent:hover:not(:disabled) {
+            background-color: #4f46e5;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .btn-danger {
+            background-color: var(--null-color);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background-color: #dc2626;
+            box-shadow: 0 0 15px var(--danger-glow);
+        }
+
+        .btn-utility {
+            background-color: #334155;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-utility:hover:not(:disabled) {
+            background-color: #475569;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* SLIDER GROUP */
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #0f172a;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .slider-labels {
+            display: flex;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .speed-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+        }
+
+        .speed-slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            box-shadow: 0 0 5px var(--accent-glow);
+            transition: transform 0.1s;
+        }
+
+        .speed-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* STATUS BOX */
+        .status-box {
+            flex: 1;
+            min-width: 250px;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-color);
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            min-height: 42px;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* TWO COLUMN DETAIL LAYOUT */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-card h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 0.5rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* TABLES */
+        .properties-table, .complexity-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .properties-table th, .properties-table td,
+        .complexity-table th, .complexity-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .properties-table th, .complexity-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .properties-table td:first-child, .complexity-table td:first-child {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .properties-table td:last-child {
+            font-family: 'Fira Code', monospace;
+            color: var(--secondary-color);
+        }
+
+        .complexity-table tr.highlighted-op {
+            background: rgba(99, 102, 241, 0.15);
+            border-left: 3px solid var(--accent-color);
+            font-weight: 600;
+        }
+
+        .complexity-table tr.highlighted-op td {
+            color: var(--accent-color);
+        }
+
+        .complexity-table td code {
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.2);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            color: var(--secondary-color);
+        }
+
+        /* ALGORITHM EXPLANATION */
+        .algo-explanation-box {
+            margin-top: 1.25rem;
+            padding: 1rem;
+            background: #0f172a;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .algo-explanation-box strong {
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        /* CODE & PSEUDOCODE CONTAINER */
+        .code-grid {
+            display: grid;
+            grid-template-columns: 4.5fr 5.5fr;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        /* PSEUDOCODE PANEL */
+        .pseudocode-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .panel-tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.4rem 0.8rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all var(--transition-speed);
+            white-space: nowrap;
+        }
+
+        .panel-tab-btn:hover {
+            color: var(--text-color);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .panel-tab-btn.active {
+            color: var(--accent-color);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .pseudocode-display {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-muted);
+        }
+
+        .pseudo-line {
+            display: block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.15s;
+            white-space: pre;
+        }
+
+        .pseudo-line.highlight {
+            background: rgba(99, 102, 241, 0.35);
+            color: white;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+            border-left: 3px solid var(--accent-color);
+            padding-left: calc(0.5rem - 3px);
+        }
+
+        /* CODE VIEWER CARD */
+        .code-viewer-card {
+            position: relative;
+        }
+
+        .code-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .code-viewer-body {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .code-pre {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: #94a3b8;
+            margin: 0;
+            tab-size: 4;
+        }
+
+        .keyword { color: #f43f5e; }
+        .type { color: #22d3ee; }
+        .class-name { color: #f59e0b; }
+        .function { color: #3b82f6; }
+        .number { color: #ec4899; }
+        .comment { color: #64748b; font-style: italic; }
+        .string { color: #10b981; }
+
+        /* COMPARISON PANEL */
+        .comparison-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            width: 100%;
+        }
+
+        .comparison-section h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .comparison-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .comparison-table th {
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+        }
+
+        /* REAL WORLD APPLICATIONS */
+        .apps-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .app-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transition: all var(--transition-speed);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity var(--transition-speed);
+        }
+
+        .app-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.25);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .app-card:hover::before {
+            opacity: 1;
+        }
+
+        .app-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .app-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .app-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* FOOTER */
+        .footer {
+            background-color: #0b0f19;
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 2rem 2rem 2rem;
+            margin-top: auto;
+            color: var(--text-muted);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-brand {
+            max-width: 300px;
+        }
+
+        .footer-brand .logo {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-brand p {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 4rem;
+        }
+
+        .footer-link-group h4 {
+            color: var(--text-color);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .footer-link-group ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-link-group a {
+            font-size: 0.85rem;
+            transition: color var(--transition-speed);
+        }
+
+        .footer-link-group a:hover {
+            color: var(--accent-color);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* KEYFRAMES & ANIMATIONS */
+        @keyframes flowForward {
+            0% { stroke-dashoffset: 20; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        @keyframes flowBackward {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 20; }
+        }
+
+        @keyframes nodeEnter {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes pulseActive {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+            20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, 10px) scale(0.8);
+            }
+            50% {
+                transform: translate(-50%, -5px) scale(1.05);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+            }
+        }
+
+        /* SPACER ELEMENT FOR SLIDE ANIMATION */
+        .node-spacer {
+            transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            width: 0;
+            height: 80px;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1024px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            .code-grid {
+                grid-template-columns: 1fr;
+            }
+            .apps-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: var(--bg-color);
+                border-bottom: 1px solid var(--border-color);
+                padding: 1rem;
+                gap: 1rem;
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .hamburger {
+                display: flex;
+            }
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            .main-container {
+                padding: 1rem;
+            }
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .input-box {
+                width: 100% !important;
+            }
+            .btn {
+                width: 100%;
+            }
+            .slider-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            .apps-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-mark">AV</span>
+            <span class="logo-text">AlgoViz</span>
+        </div>
+        <button class="hamburger" id="hamburger-menu" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <ul class="nav-links" id="nav-links-menu">
+            <li><a href="array.html">Arrays</a></li>
+            <li><a href="stack.html">Stack</a></li>
+            <li><a href="queue.html">Queue</a></li>
+            <li><a href="linkedlist.html" class="active-link">Linked List</a></li>
+            <li><a href="tree.html">Trees</a></li>
+            <li><a href="graph.html">Graphs</a></li>
+            <li><a href="sorting.html">Sorting</a></li>
+        </ul>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+        <h1>Linked List Visualizer</h1>
+        <p>Dynamic nodes connected through pointers</p>
+        <div class="type-toggles">
+            <button class="type-toggle-btn active" data-type="singly">Singly Linked List</button>
+            <button class="type-toggle-btn" data-type="doubly">Doubly Linked List</button>
+            <button class="type-toggle-btn" data-type="circular">Circular Linked List</button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="main-container">
+        
+        <!-- VISUALIZATION PANEL -->
+        <section class="viz-card">
+            <div class="viz-header">
+                <div class="viz-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12H3m18 0l-4-4m4 4l-4 4"/></svg>
+                    Visualization Area
+                </div>
+            </div>
+            
+            <div class="viz-canvas-wrapper" id="canvas-wrapper">
+                <div class="viz-canvas" id="list-canvas">
+                    <!-- Nodes will render dynamically here -->
+                </div>
+                <!-- Circular arc overlay -->
+                <svg class="circular-svg-overlay" id="circular-svg"></svg>
+            </div>
+        </section>
+
+        <!-- CONTROLS PANEL -->
+        <section class="controls-card">
+            <!-- ROW 1: Operations -->
+            <div class="control-row">
+                <div class="control-group">
+                    <input type="number" class="input-box" id="val-input" placeholder="Enter Value">
+                    <input type="number" class="input-box pos-input" id="pos-input" placeholder="Enter Position (0-based)">
+                </div>
+                <div class="control-group">
+                    <button class="btn btn-accent" id="insert-head-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                        Insert Head
+                    </button>
+                    <button class="btn btn-accent" id="insert-tail-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                        Insert Tail
+                    </button>
+                    <button class="btn btn-accent" id="insert-pos-btn">Insert at Pos</button>
+                </div>
+                <div class="control-group">
+                    <button class="btn btn-danger" id="delete-head-btn">Delete Head</button>
+                    <button class="btn btn-danger" id="delete-tail-btn">Delete Tail</button>
+                    <button class="btn btn-danger" id="delete-val-btn">Delete by Val</button>
+                </div>
+            </div>
+
+            <!-- ROW 2: Utilities -->
+            <div class="control-row">
+                <button class="btn btn-utility" id="search-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    Search
+                </button>
+                <button class="btn btn-utility" id="traverse-btn">Traverse</button>
+                <button class="btn btn-utility" id="reverse-btn">Reverse</button>
+                <button class="btn btn-utility" id="clear-btn">Clear</button>
+
+                <div class="slider-group">
+                    <span>Speed</span>
+                    <input type="range" class="speed-slider" id="speed-slider" min="0" max="2" value="1" step="1">
+                    <div class="slider-labels">
+                        <span id="speed-text">Med</span>
+                    </div>
+                </div>
+
+                <div class="status-box" id="status-logger">
+                    Ready to visualize... Select an operation.
+                </div>
+            </div>
+        </section>
+
+        <!-- INFO PANELS (2 Columns) -->
+        <div class="info-grid">
+            
+            <!-- LEFT PANEL: Real-time Properties & Last performed operation details -->
+            <div class="info-card">
+                <h2>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+                    Live Properties
+                </h2>
+                <table class="properties-table">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Size</td>
+                            <td id="prop-size">0</td>
+                        </tr>
+                        <tr>
+                            <td>Head Value</td>
+                            <td id="prop-head">null</td>
+                        </tr>
+                        <tr>
+                            <td>Tail Value</td>
+                            <td id="prop-tail">null</td>
+                        </tr>
+                        <tr>
+                            <td>isEmpty</td>
+                            <td id="prop-empty">true</td>
+                        </tr>
+                        <tr>
+                            <td>List Type</td>
+                            <td id="prop-type">Singly</td>
+                        </tr>
+                        <tr>
+                            <td>Memory Usage</td>
+                            <td id="prop-mem">0 nodes &times; 8 bytes</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="algo-explanation-box" id="algo-explanation">
+                    <strong>Direct Manipulation</strong>
+                    Select an operation above to view its real-time mathematical representation and algorithmic justification here.
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Time & Space Complexity table -->
+            <div class="info-card">
+                <h2>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Complexity Profiles
+                </h2>
+                <table class="complexity-table" id="complexity-table">
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Singly</th>
+                            <th>Doubly</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="row-op-head">
+                            <td>Insert at Head</td>
+                            <td><code>O(1)</code></td>
+                            <td><code>O(1)</code></td>
+                        </tr>
+                        <tr id="row-op-tail">
+                            <td>Insert at Tail</td>
+                            <td><code>O(1)*</code></td>
+                            <td><code>O(1)</code></td>
+                        </tr>
+                        <tr id="row-op-pos">
+                            <td>Insert at Position</td>
+                            <td><code>O(n)</code></td>
+                            <td><code>O(n)</code></td>
+                        </tr>
+                        <tr id="row-op-del-head">
+                            <td>Delete at Head</td>
+                            <td><code>O(1)</code></td>
+                            <td><code>O(1)</code></td>
+                        </tr>
+                        <tr id="row-op-del-tail">
+                            <td>Delete at Tail</td>
+                            <td><code>O(n)</code></td>
+                            <td><code>O(1)</code></td>
+                        </tr>
+                        <tr id="row-op-del-val">
+                            <td>Delete by Value</td>
+                            <td><code>O(n)</code></td>
+                            <td><code>O(n)</code></td>
+                        </tr>
+                        <tr id="row-op-search">
+                            <td>Search</td>
+                            <td><code>O(n)</code></td>
+                            <td><code>O(n)</code></td>
+                        </tr>
+                        <tr id="row-op-traverse">
+                            <td>Traverse</td>
+                            <td><code>O(n)</code></td>
+                            <td><code>O(n)</code></td>
+                        </tr>
+                        <tr id="row-op-reverse">
+                            <td>Reverse</td>
+                            <td><code>O(n)</code></td>
+                            <td><code>O(n)</code></td>
+                        </tr>
+                        <tr>
+                            <td>Auxiliary Space</td>
+                            <td><code>O(n)</code></td>
+                            <td><code>O(n)</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CODE & PSEUDOCODE PANELS -->
+        <div class="code-grid">
+            
+            <!-- PSEUDOCODE TABS -->
+            <div class="info-card pseudocode-card">
+                <h2>Pseudocode Tracker</h2>
+                <div class="panel-tabs" id="pseudo-tabs">
+                    <button class="panel-tab-btn active" data-op="insertHead">Insert Head</button>
+                    <button class="panel-tab-btn" data-op="insertTail">Insert Tail</button>
+                    <button class="panel-tab-btn" data-op="insertPos">Insert Pos</button>
+                    <button class="panel-tab-btn" data-op="deleteHead">Delete Head</button>
+                    <button class="panel-tab-btn" data-op="deleteTail">Delete Tail</button>
+                    <button class="panel-tab-btn" data-op="search">Search</button>
+                    <button class="panel-tab-btn" data-op="reverse">Reverse</button>
+                </div>
+                <div class="pseudocode-display" id="pseudocode-container">
+                    <!-- Pseudocode lines render dynamically -->
+                </div>
+            </div>
+
+            <!-- CODE VIEW PANEL -->
+            <div class="info-card code-viewer-card">
+                <div class="code-header-row">
+                    <h2>Implementation Code</h2>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <div class="panel-tabs" id="code-tabs" style="border:none; margin:0; padding:0;">
+                            <button class="panel-tab-btn active" data-lang="cpp">C++</button>
+                            <button class="panel-tab-btn" data-lang="javascript">JavaScript</button>
+                            <button class="panel-tab-btn" data-lang="python">Python</button>
+                            <button class="panel-tab-btn" data-lang="java">Java</button>
+                        </div>
+                        <button class="btn btn-utility" id="copy-code-btn" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">Copy</button>
+                    </div>
+                </div>
+                <div class="code-viewer-body">
+                    <pre class="code-pre" id="code-pre-box"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPARISON PANEL -->
+        <section class="comparison-section">
+            <h2>Linked List Comparisons</h2>
+            <div class="comparison-grid">
+                
+                <!-- Singly vs Doubly vs Circular -->
+                <div class="comparison-table-wrapper">
+                    <h3 style="font-size:1.1rem; font-weight:600; margin-bottom:1rem; color:var(--secondary-color);">Linked List Types — Side by Side</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Singly</th>
+                                <th>Doubly</th>
+                                <th>Circular</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Pointers / Node</td>
+                                <td>1 (next)</td>
+                                <td>2 (next + prev)</td>
+                                <td>1 or 2</td>
+                            </tr>
+                            <tr>
+                                <td>Memory / Node</td>
+                                <td>Less</td>
+                                <td>More</td>
+                                <td>Same</td>
+                            </tr>
+                            <tr>
+                                <td>Traversal</td>
+                                <td>Forward</td>
+                                <td>Both directions</td>
+                                <td>Circular loop</td>
+                            </tr>
+                            <tr>
+                                <td>Delete Tail</td>
+                                <td>O(n)</td>
+                                <td>O(1)</td>
+                                <td>O(n) / O(1)</td>
+                            </tr>
+                            <tr>
+                                <td>Best For</td>
+                                <td>Stacks / Memory tight</td>
+                                <td>Deques / Undo buffers</td>
+                                <td>Round-robin buffers</td>
+                            </tr>
+                            <tr>
+                                <td>Reverse Ease</td>
+                                <td>✅ Normal</td>
+                                <td>✅ Simple</td>
+                                <td>⚠️ Complex</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Linked List vs Array -->
+                <div class="comparison-table-wrapper">
+                    <h3 style="font-size:1.1rem; font-weight:600; margin-bottom:1rem; color:var(--secondary-color);">Linked List vs Array</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Linked List</th>
+                                <th>Array</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Insert at Head</td>
+                                <td>O(1)</td>
+                                <td>O(n)</td>
+                            </tr>
+                            <tr>
+                                <td>Insert at Tail</td>
+                                <td>O(1)* with tail ptr</td>
+                                <td>O(1) amortized</td>
+                            </tr>
+                            <tr>
+                                <td>Access by Index</td>
+                                <td>O(n)</td>
+                                <td>O(1)</td>
+                            </tr>
+                            <tr>
+                                <td>Memory Allocation</td>
+                                <td>Dynamic (node by node)</td>
+                                <td>Fixed size / wasteful</td>
+                            </tr>
+                            <tr>
+                                <td>Cache Locality</td>
+                                <td>Poor (scattered nodes)</td>
+                                <td>Excellent (contiguous)</td>
+                            </tr>
+                            <tr>
+                                <td>Delete Middle</td>
+                                <td>O(n)</td>
+                                <td>O(n)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- REAL WORLD APPLICATIONS -->
+        <section class="control-row" style="flex-direction: column; align-items: flex-start; gap: 0.75rem;">
+            <h2 style="font-size:1.4rem; font-weight:600; color:var(--text-color);">Real World Applications</h2>
+            <div class="apps-container">
+                <div class="app-card">
+                    <span class="app-icon">🎵</span>
+                    <h3>Music Playlist</h3>
+                    <p>Doubly Linked Lists facilitate seamless traversal back and forth between previous and next audio tracks in modern streaming players.</p>
+                </div>
+                <div class="app-card">
+                    <span class="app-icon">🌐</span>
+                    <h3>Browser History</h3>
+                    <p>Web browsers store history using Doubly Linked Lists to enable quick and backward/forward page movements via user navigations.</p>
+                </div>
+                <div class="app-card">
+                    <span class="app-icon">🔄</span>
+                    <h3>CPU Scheduling</h3>
+                    <p>Circular Linked Lists keep references rotating continuously to assign processor intervals in a round-robin schedule cleanly.</p>
+                </div>
+                <div class="app-card">
+                    <span class="app-icon">📝</span>
+                    <h3>Undo / Redo Buffer</h3>
+                    <p>Stacks built on Linked Lists handle edit actions, keeping tracking lightweight and easy to push new snapshots sequentially.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="logo">
+                    <span class="logo-mark">AV</span>
+                    <span class="logo-text">AlgoViz</span>
+                </div>
+                <p>A FAANG-level platform dedicated to visualizing and mastering data structures & algorithms cleanly.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-link-group">
+                    <h4>Structures</h4>
+                    <ul>
+                        <li><a href="array.html">Arrays</a></li>
+                        <li><a href="stack.html">Stack</a></li>
+                        <li><a href="queue.html">Queue</a></li>
+                        <li><a href="linkedlist.html">Linked List</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h4>Advanced</h4>
+                    <ul>
+                        <li><a href="tree.html">Trees</a></li>
+                        <li><a href="graph.html">Graphs</a></li>
+                        <li><a href="sorting.html">Sorting</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 AlgoViz. All rights reserved. Built for engineering excellence.</p>
+            <p>Designed with ❤️ by Google DeepMind team.</p>
+        </div>
+    </footer>
+
+    <!-- TOOLTIP OVERLAYS -->
+    <div class="node-tooltip" id="node-tooltip-box"></div>
+
+    <script>
+        /* PSEUDOCODE REGISTRY */
+        const PSEUDOCODE = {
+            insertHead: [
+                "procedure INSERT_HEAD(list, value):",
+                "  newNode = createNode(value)",
+                "  newNode.next = list.head",
+                "  list.head = newNode",
+                "  if list.tail == null:",
+                "    list.tail = newNode",
+                "  list.size = list.size + 1"
+            ],
+            insertTail: [
+                "procedure INSERT_TAIL(list, value):",
+                "  newNode = createNode(value)",
+                "  if list.isEmpty():",
+                "    list.head = newNode",
+                "    list.tail = newNode",
+                "  else:",
+                "    list.tail.next = newNode",
+                "    list.tail = newNode",
+                "  list.size = list.size + 1"
+            ],
+            insertPos: [
+                "procedure INSERT_AT(list, value, pos):",
+                "  if pos == 0: INSERT_HEAD(list, value)",
+                "  newNode = createNode(value)",
+                "  current = list.head",
+                "  for i = 0 to pos-2:",
+                "    current = current.next",
+                "  newNode.next = current.next",
+                "  current.next = newNode",
+                "  list.size = list.size + 1"
+            ],
+            deleteHead: [
+                "procedure DELETE_HEAD(list):",
+                "  if list.isEmpty(): return \"Underflow\"",
+                "  value = list.head.data",
+                "  list.head = list.head.next",
+                "  if list.head == null:",
+                "    list.tail = null",
+                "  list.size = list.size - 1",
+                "  return value"
+            ],
+            deleteTail: [
+                "procedure DELETE_TAIL(list):",
+                "  if list.isEmpty(): return \"Underflow\"",
+                "  if list.size == 1:",
+                "    DELETE_HEAD(list)",
+                "    return",
+                "  current = list.head",
+                "  while current.next.next != null:",
+                "    current = current.next",
+                "  value = current.next.data",
+                "  current.next = null",
+                "  list.tail = current",
+                "  list.size = list.size - 1",
+                "  return value"
+            ],
+            search: [
+                "procedure SEARCH(list, value):",
+                "  current = list.head",
+                "  position = 0",
+                "  while current != null:",
+                "    if current.data == value:",
+                "      return position",
+                "    current = current.next",
+                "    position = position + 1",
+                "  return \"Not Found\""
+            ],
+            reverse: [
+                "procedure REVERSE(list):",
+                "  prev = null",
+                "  current = list.head",
+                "  list.tail = list.head",
+                "  while current != null:",
+                "    next = current.next",
+                "    current.next = prev",
+                "    prev = current",
+                "    current = next",
+                "  list.head = prev"
+            ]
+        };
+
+        /* SOURCE CODE ARCHIVE */
+        const CODE_ARCHIVE = {
+            cpp: `// C++ Linked List Implementation
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node* prev; // for doubly linked list
+    Node(int val) : data(val), next(nullptr), prev(nullptr) {}
+};
+
+class LinkedList {
+private:
+    Node* head;
+    Node* tail;
+    int size;
+public:
+    LinkedList() : head(nullptr), tail(nullptr), size(0) {}
+
+    void insertHead(int value) {
+        Node* newNode = new Node(value);
+        if (head) {
+            newNode->next = head;
+            head->prev = newNode;
+        }
+        head = newNode;
+        if (!tail) tail = newNode;
+        size++;
+    }
+
+    void insertTail(int value) {
+        Node* newNode = new Node(value);
+        if (!head) {
+            head = tail = newNode;
+        } else {
+            tail->next = newNode;
+            newNode->prev = tail;
+            tail = newNode;
+        }
+        size++;
+    }
+
+    void insertAt(int value, int pos) {
+        if (pos == 0) {
+            insertHead(value); return;
+        }
+        Node* newNode = new Node(value);
+        Node* curr = head;
+        for (int i = 0; i < pos - 1 && curr; i++)
+            curr = curr->next;
+        if (!curr) return;
+        newNode->next = curr->next;
+        newNode->prev = curr;
+        if (curr->next) curr->next->prev = newNode;
+        curr->next = newNode;
+        if (!newNode->next) tail = newNode;
+        size++;
+    }
+
+    int deleteHead() {
+        if (!head) throw runtime_error("List is Empty");
+        int val = head->data;
+        Node* temp = head;
+        head = head->next;
+        if (head) head->prev = nullptr;
+        else tail = nullptr;
+        delete temp;
+        size--;
+        return val;
+    }
+
+    int deleteTail() {
+        if (!head) throw runtime_error("List is Empty");
+        if (head == tail) return deleteHead();
+        int val = tail->data;
+        Node* temp = tail;
+        tail = tail->prev;
+        tail->next = nullptr;
+        delete temp;
+        size--;
+        return val;
+    }
+
+    int search(int value) {
+        Node* curr = head;
+        int pos = 0;
+        while (curr) {
+            if (curr->data == value) return pos;
+            curr = curr->next;
+            pos++;
+        }
+        return -1;
+    }
+
+    void reverse() {
+        Node* curr = head;
+        Node* temp = nullptr;
+        tail = head;
+        while (curr) {
+            temp = curr->prev;
+            curr->prev = curr->next;
+            curr->next = temp;
+            curr = curr->prev;
+        }
+        if (temp) head = temp->prev;
+    }
+};`,
+            javascript: `// JavaScript Linked List Implementation
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.next = null;
+        this.prev = null;
+    }
+}
+
+class LinkedList {
+    constructor() {
+        this.head = null;
+        this.tail = null;
+        this.size = 0;
+    }
+
+    insertHead(value) {
+        const newNode = new Node(value);
+        if (this.head) {
+            newNode.next = this.head;
+            this.head.prev = newNode;
+        }
+        this.head = newNode;
+        if (!this.tail) this.tail = newNode;
+        this.size++;
+    }
+
+    insertTail(value) {
+        const newNode = new Node(value);
+        if (!this.head) {
+            this.head = this.tail = newNode;
+        } else {
+            this.tail.next = newNode;
+            newNode.prev = this.tail;
+            this.tail = newNode;
+        }
+        this.size++;
+    }
+
+    insertAt(value, pos) {
+        if (pos === 0) {
+            this.insertHead(value); return;
+        }
+        const newNode = new Node(value);
+        let curr = this.head;
+        for (let i = 0; i < pos - 1 && curr; i++) {
+            curr = curr.next;
+        }
+        if (!curr) return;
+        newNode.next = curr.next;
+        newNode.prev = curr;
+        if (curr.next) curr.next.prev = newNode;
+        curr.next = newNode;
+        if (!newNode.next) this.tail = newNode;
+        this.size++;
+    }
+
+    deleteHead() {
+        if (!this.head) throw new Error("List is Empty");
+        const val = this.head.data;
+        this.head = this.head.next;
+        if (this.head) this.head.prev = null;
+        else this.tail = null;
+        this.size--;
+        return val;
+    }
+
+    deleteTail() {
+        if (!this.head) throw new Error("List is Empty");
+        if (this.head === this.tail) return this.deleteHead();
+        const val = this.tail.data;
+        this.tail = this.tail.prev;
+        this.tail.next = null;
+        this.size--;
+        return val;
+    }
+
+    search(value) {
+        let curr = this.head;
+        let pos = 0;
+        while (curr) {
+            if (curr.data === value) return pos;
+            curr = curr.next;
+            pos++;
+        }
+        return -1;
+    }
+
+    reverse() {
+        let curr = this.head;
+        let temp = null;
+        this.tail = this.head;
+        while (curr) {
+            temp = curr.prev;
+            curr.prev = curr.next;
+            curr.next = temp;
+            curr = curr.prev;
+        }
+        if (temp) this.head = temp.prev;
+    }
+}`,
+            python: `# Python Linked List Implementation
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+        self.prev = None
+
+class LinkedList:
+    def __init__(self):
+        self.head = None
+        self.tail = None
+        self.size = 0
+
+    def insert_head(self, value):
+        new_node = Node(value)
+        if self.head:
+            new_node.next = self.head
+            self.head.prev = new_node
+        self.head = new_node
+        if not self.tail:
+            self.tail = new_node
+        self.size += 1
+
+    def insert_tail(self, value):
+        new_node = Node(value)
+        if not self.head:
+            self.head = self.tail = new_node
+        else:
+            self.tail.next = new_node
+            new_node.prev = self.tail
+            self.tail = new_node
+        self.size += 1
+
+    def insert_at(self, value, pos):
+        if pos == 0:
+            self.insert_head(value)
+            return
+        new_node = Node(value)
+        curr = self.head
+        for _ in range(pos - 1):
+            if not curr: break
+            curr = curr.next
+        if not curr: return
+        new_node.next = curr.next
+        new_node.prev = curr
+        if curr.next:
+            curr.next.prev = new_node
+        curr.next = new_node
+        if not new_node.next:
+            self.tail = new_node
+        self.size += 1
+
+    def delete_head(self):
+        if not self.head: raise Exception("List is Empty")
+        val = self.head.data
+        self.head = self.head.next
+        if self.head:
+            self.head.prev = None
+        else:
+            self.tail = None
+        self.size -= 1
+        return val
+
+    def delete_tail(self):
+        if not self.head: raise Exception("List is Empty")
+        if self.head == self.tail:
+            return self.delete_head()
+        val = self.tail.data
+        self.tail = self.tail.prev
+        self.tail.next = None
+        self.size -= 1
+        return val
+
+    def search(self, value):
+        curr = self.head
+        pos = 0
+        while curr:
+            if curr.data == value:
+                return pos
+            curr = curr.next
+            pos += 1
+        return -1
+
+    def reverse(self):
+        curr = self.head
+        temp = None
+        self.tail = self.head
+        while curr:
+            temp = curr.prev
+            curr.prev = curr.next;
+            curr.next = temp;
+            curr = curr.prev
+        if temp:
+            self.head = temp.prev`,
+            java: `// Java Linked List Implementation
+public class LinkedList {
+    static class Node {
+        int data;
+        Node next;
+        Node prev;
+        Node(int val) { this.data = val; }
+    }
+
+    private Node head;
+    private Node tail;
+    private int size;
+
+    public void insertHead(int value) {
+        Node newNode = new Node(value);
+        if (head != null) {
+            newNode.next = head;
+            head.prev = newNode;
+        }
+        head = newNode;
+        if (tail == null) tail = newNode;
+        size++;
+    }
+
+    public void insertTail(int value) {
+        Node newNode = new Node(value);
+        if (head == null) {
+            head = tail = newNode;
+        } else {
+            tail.next = newNode;
+            newNode.prev = tail;
+            tail = newNode;
+        }
+        size++;
+    }
+
+    public void insertAt(int value, int pos) {
+        if (pos == 0) {
+            insertHead(value); return;
+        }
+        Node newNode = new Node(value);
+        Node curr = head;
+        for (int i = 0; i < pos - 1 && curr != null; i++) {
+            curr = curr.next;
+        }
+        if (curr == null) return;
+        newNode.next = curr.next;
+        newNode.prev = curr;
+        if (curr.next != null) curr.next.prev = newNode;
+        curr.next = newNode;
+        if (newNode.next == null) tail = newNode;
+        size++;
+    }
+
+    public int deleteHead() {
+        if (head == null) throw new RuntimeException("List is Empty");
+        int val = head.data;
+        head = head.next;
+        if (head != null) head.prev = null;
+        else tail = null;
+        size--;
+        return val;
+    }
+
+    public int deleteTail() {
+        if (head == null) throw new RuntimeException("List is Empty");
+        if (head == tail) return deleteHead();
+        int val = tail.data;
+        tail = tail.prev;
+        tail.next = null;
+        size--;
+        return val;
+    }
+
+    public int search(int value) {
+        Node curr = head;
+        int pos = 0;
+        while (curr != null) {
+            if (curr.data == value) return pos;
+            curr = curr.next;
+            pos++;
+        }
+        return -1;
+    }
+
+    public void reverse() {
+        Node curr = head;
+        Node temp = null;
+        tail = head;
+        while (curr != null) {
+            temp = curr.prev;
+            curr.prev = curr.next;
+            curr.next = temp;
+            curr = curr.prev;
+        }
+        if (temp != null) head = temp.prev;
+    }
+}`
+        };
+
+        /* CORE DATA STRUCTURES */
+        class ListNode {
+            constructor(data) {
+                this.data = data;
+                this.next = null;
+                this.prev = null;
+                this.id = 'node-' + Math.random().toString(36).substr(2, 9);
+                this.address = '0x' + Math.floor(Math.random()*256).toString(16).toUpperCase().padStart(2, '0');
+            }
+        }
+
+        class LinkedList {
+            constructor() {
+                this.head = null;
+                this.tail = null;
+                this.size = 0;
+            }
+
+            insertHead(val) {
+                const node = new ListNode(val);
+                if (!this.head) {
+                    this.head = this.tail = node;
+                } else {
+                    node.next = this.head;
+                    this.head.prev = node;
+                    this.head = node;
+                }
+                this.size++;
+                return node;
+            }
+
+            insertTail(val) {
+                const node = new ListNode(val);
+                if (!this.head) {
+                    this.head = this.tail = node;
+                } else {
+                    this.tail.next = node;
+                    node.prev = this.tail;
+                    this.tail = node;
+                }
+                this.size++;
+                return node;
+            }
+
+            insertAt(val, pos) {
+                if (pos <= 0) return this.insertHead(val);
+                if (pos >= this.size) return this.insertTail(val);
+
+                const node = new ListNode(val);
+                let curr = this.head;
+                for (let i = 0; i < pos - 1; i++) {
+                    curr = curr.next;
+                }
+                node.next = curr.next;
+                node.prev = curr;
+                if (curr.next) {
+                    curr.next.prev = node;
+                }
+                curr.next = node;
+                this.size++;
+                return node;
+            }
+
+            deleteHead() {
+                if (!this.head) return null;
+                const removed = this.head;
+                this.head = this.head.next;
+                if (this.head) {
+                    this.head.prev = null;
+                } else {
+                    this.tail = null;
+                }
+                this.size--;
+                return removed;
+            }
+
+            deleteTail() {
+                if (!this.head) return null;
+                if (this.head === this.tail) return this.deleteHead();
+
+                const removed = this.tail;
+                this.tail = this.tail.prev;
+                this.tail.next = null;
+                this.size--;
+                return removed;
+            }
+
+            deleteAt(pos) {
+                if (pos <= 0) return this.deleteHead();
+                if (pos >= this.size - 1) return this.deleteTail();
+
+                let curr = this.head;
+                for (let i = 0; i < pos; i++) {
+                    curr = curr.next;
+                }
+                const removed = curr;
+                if (curr.prev) curr.prev.next = curr.next;
+                if (curr.next) curr.next.prev = curr.prev;
+                this.size--;
+                return removed;
+            }
+
+            toArray() {
+                const arr = [];
+                let curr = this.head;
+                while (curr) {
+                    arr.push(curr);
+                    curr = curr.next;
+                }
+                return arr;
+            }
+
+            clear() {
+                this.head = null;
+                this.tail = null;
+                this.size = 0;
+            }
+        }
+
+        /* STATE MANAGEMENT */
+        let listType = 'singly'; // 'singly', 'doubly', 'circular'
+        let list = new LinkedList();
+        let isAnimating = false;
+        let currentStepDelay = 400; // ms per step
+
+        // Elements
+        const canvas = document.getElementById('list-canvas');
+        const canvasWrapper = document.getElementById('canvas-wrapper');
+        const circularSvg = document.getElementById('circular-svg');
+        const valInput = document.getElementById('val-input');
+        const posInput = document.getElementById('pos-input');
+        const statusLogger = document.getElementById('status-logger');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedText = document.getElementById('speed-text');
+        
+        // Buttons
+        const btns = {
+            insertHead: document.getElementById('insert-head-btn'),
+            insertTail: document.getElementById('insert-tail-btn'),
+            insertPos: document.getElementById('insert-pos-btn'),
+            deleteHead: document.getElementById('delete-head-btn'),
+            deleteTail: document.getElementById('delete-tail-btn'),
+            deleteVal: document.getElementById('delete-val-btn'),
+            search: document.getElementById('search-btn'),
+            traverse: document.getElementById('traverse-btn'),
+            reverse: document.getElementById('reverse-btn'),
+            clear: document.getElementById('clear-btn')
+        };
+
+        // Properties elements
+        const props = {
+            size: document.getElementById('prop-size'),
+            head: document.getElementById('prop-head'),
+            tail: document.getElementById('prop-tail'),
+            empty: document.getElementById('prop-empty'),
+            type: document.getElementById('prop-type'),
+            mem: document.getElementById('prop-mem')
+        };
+
+        // UI Tabs & displays
+        const pseudoTabs = document.getElementById('pseudo-tabs');
+        const pseudocodeContainer = document.getElementById('pseudocode-container');
+        const codeTabs = document.getElementById('code-tabs');
+        const codePreBox = document.getElementById('code-pre-box');
+        const copyCodeBtn = document.getElementById('copy-code-btn');
+        const algoExplanation = document.getElementById('algo-explanation');
+
+        /* ANIMATION UTILITIES */
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        function setLock(lock) {
+            isAnimating = lock;
+            Object.values(btns).forEach(btn => btn.disabled = lock);
+            document.querySelectorAll('.type-toggle-btn').forEach(btn => btn.disabled = lock);
+            valInput.disabled = lock;
+            posInput.disabled = lock;
+        }
+
+        function logStatus(message, type = 'info') {
+            let prefix = '⚙️ ';
+            if (type === 'success') prefix = '✅ ';
+            if (type === 'error') prefix = '❌ ';
+            if (type === 'warning') prefix = '⚠️ ';
+            if (type === 'search') prefix = '🔍 ';
+            if (type === 'reverse') prefix = '🔄 ';
+            statusLogger.innerHTML = `<span style="color: var(--secondary-color);">${prefix}</span> ${message}`;
+        }
+
+        /* RENDERING ENGINE */
+        function renderList() {
+            canvas.innerHTML = '';
+            const nodes = list.toArray();
+
+            if (nodes.length === 0) {
+                canvas.innerHTML = `
+                    <div class="empty-state">
+                        <div class="ghost-node">NULL</div>
+                        <h3>List is Empty</h3>
+                        <p>Add your first node using the controls below to begin.</p>
+                    </div>
+                `;
+                // Clear circular SVG lines
+                circularSvg.innerHTML = '';
+                updateProperties();
+                return;
+            }
+
+            nodes.forEach((node, index) => {
+                const nodeContainer = document.createElement('div');
+                nodeContainer.className = 'node-container';
+                nodeContainer.id = `container-${node.id}`;
+
+                // Index Badge + Head/Tail Indicator
+                let badgeHTML = `<span class="node-index">Index ${index}</span>`;
+                if (index === 0) {
+                    badgeHTML += `<span class="node-ptr-label label-head">HEAD</span>`;
+                }
+                if (index === nodes.length - 1) {
+                    badgeHTML += `<span class="node-ptr-label label-tail">TAIL</span>`;
+                }
+
+                // Node Inner Layout
+                let cardClass = 'node-card';
+                let innerHTML = '';
+
+                if (listType === 'doubly') {
+                    cardClass += ' doubly-node';
+                    const prevAddr = node.prev ? node.prev.address : 'null';
+                    const nextAddr = node.next ? node.next.address : 'null';
+                    innerHTML = `
+                        <div class="node-prev">${prevAddr}</div>
+                        <div class="node-data">${node.data}</div>
+                        <div class="node-link">${nextAddr}</div>
+                    `;
+                } else {
+                    let nextAddr = 'null';
+                    if (listType === 'circular' && index === nodes.length - 1) {
+                        nextAddr = nodes[0].address;
+                    } else if (node.next) {
+                        nextAddr = node.next.address;
+                    }
+                    innerHTML = `
+                        <div class="node-data">${node.data}</div>
+                        <div class="node-link">${nextAddr}</div>
+                    `;
+                }
+
+                nodeContainer.innerHTML = `
+                    <div class="node-badge-container">${badgeHTML}</div>
+                    <div class="${cardClass}" id="${node.id}" 
+                         onmouseenter="showNodeTooltip(event, '${node.id}', '${node.address}', '${node.data}', ${index})" 
+                         onmouseleave="hideNodeTooltip()">
+                        ${innerHTML}
+                    </div>
+                `;
+
+                canvas.appendChild(nodeContainer);
+
+                // Add arrow (if not last node)
+                if (index < nodes.length - 1) {
+                    const arrowContainer = document.createElement('div');
+                    arrowContainer.className = 'arrow-container';
+                    arrowContainer.id = `arrow-wrapper-${node.id}`;
+
+                    let arrowSvgHTML = '';
+                    if (listType === 'doubly') {
+                        arrowSvgHTML = `
+                            <svg class="arrow-svg" viewBox="0 0 70 80">
+                                <defs>
+                                    <marker id="arrow-r" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                        <polygon points="0 0, 6 3, 0 6" class="arrow-head"></polygon>
+                                    </marker>
+                                    <marker id="arrow-l" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                        <polygon points="0 0, 6 3, 0 6" class="arrow-head backward"></polygon>
+                                    </marker>
+                                </defs>
+                                <path d="M 5,28 L 65,28" class="arrow-line forward" marker-end="url(#arrow-r)"></path>
+                                <path d="M 65,52 L 5,52" class="arrow-line backward" marker-end="url(#arrow-l)"></path>
+                            </svg>
+                        `;
+                    } else {
+                        arrowSvgHTML = `
+                            <svg class="arrow-svg" viewBox="0 0 70 80">
+                                <defs>
+                                    <marker id="arrow-r-single" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                        <polygon points="0 0, 6 3, 0 6" class="arrow-head"></polygon>
+                                    </marker>
+                                </defs>
+                                <path d="M 5,40 L 65,40" class="arrow-line forward" marker-end="url(#arrow-r-single)"></path>
+                            </svg>
+                        `;
+                    }
+
+                    arrowContainer.innerHTML = arrowSvgHTML;
+                    canvas.appendChild(arrowContainer);
+                }
+            });
+
+            // Append NULL badge if not circular
+            if (listType !== 'circular') {
+                const nullArrow = document.createElement('div');
+                nullArrow.className = 'arrow-container';
+                nullArrow.id = 'arrow-to-null';
+                nullArrow.innerHTML = `
+                    <svg class="arrow-svg" viewBox="0 0 70 80">
+                        <defs>
+                            <marker id="arrow-r-null" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                <polygon points="0 0, 6 3, 0 6" class="arrow-head"></polygon>
+                            </marker>
+                        </defs>
+                        <path d="M 5,40 L 65,40" class="arrow-line forward" marker-end="url(#arrow-r-null)"></path>
+                    </svg>
+                `;
+                canvas.appendChild(nullArrow);
+
+                const nullBox = document.createElement('div');
+                nullBox.className = 'null-pill';
+                nullBox.innerText = 'NULL';
+                canvas.appendChild(nullBox);
+            }
+
+            updateProperties();
+            setTimeout(drawCircularArc, 100);
+        }
+
+        /* TOOLTIP LOGIC */
+        function showNodeTooltip(e, id, addr, val, idx) {
+            const tooltip = document.getElementById('node-tooltip-box');
+            let typeName = listType.charAt(0).toUpperCase() + listType.slice(1);
+            let prevNode = list.toArray()[idx].prev;
+            let nextNode = list.toArray()[idx].next;
+
+            let prevText = prevNode ? prevNode.address : 'NULL';
+            let nextText = nextNode ? nextNode.address : 'NULL';
+            if (listType === 'circular' && idx === list.size - 1 && list.size > 0) {
+                nextText = list.toArray()[0].address;
+            }
+
+            tooltip.innerHTML = `
+                <span><strong>Node ID:</strong> ${id}</span>
+                <span><strong>Index:</strong> ${idx}</span>
+                <span><strong>Value:</strong> ${val}</span>
+                <span><strong>Sim. Address:</strong> ${addr}</span>
+                <span><strong>Next:</strong> ${nextText}</span>
+                ${listType === 'doubly' ? `<span><strong>Prev:</strong> ${prevText}</span>` : ''}
+            `;
+            tooltip.style.display = 'flex';
+            
+            const rect = e.target.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + window.scrollX + (rect.width/2)}px`;
+            tooltip.style.top = `${rect.top + window.scrollY - 110}px`;
+        }
+
+        function hideNodeTooltip() {
+            document.getElementById('node-tooltip-box').style.display = 'none';
+        }
+
+        /* PROPERTIES WRITER */
+        function updateProperties() {
+            props.size.innerText = list.size;
+            props.head.innerText = list.head ? list.head.data : 'null';
+            props.tail.innerText = list.tail ? list.tail.data : 'null';
+            props.empty.innerText = list.size === 0 ? 'true' : 'false';
+            props.type.innerText = listType.charAt(0).toUpperCase() + listType.slice(1);
+            props.mem.innerText = `${list.size} nodes × ${listType === 'doubly' ? 12 : 8} bytes`;
+        }
+
+        /* DYNAMIC CIRCULAR ARC DRAWING */
+        function drawCircularArc() {
+            circularSvg.innerHTML = '';
+            if (listType !== 'circular' || list.size === 0) return;
+
+            const nodes = list.toArray();
+            const headCard = document.getElementById(nodes[0].id);
+            const tailCard = document.getElementById(nodes[nodes.length - 1].id);
+            
+            if (!headCard || !tailCard) return;
+
+            const wrapperRect = canvasWrapper.getBoundingClientRect();
+            const headRect = headCard.getBoundingClientRect();
+            const tailRect = tailCard.getBoundingClientRect();
+
+            // Calculate coordinates relative to canvas-wrapper
+            const headX = headRect.left - wrapperRect.left + (headRect.width / 2) + canvasWrapper.scrollLeft;
+            const headY = headRect.top - wrapperRect.top + headRect.height;
+            const tailX = tailRect.left - wrapperRect.left + (tailRect.width / 2) + canvasWrapper.scrollLeft;
+            const tailY = tailRect.top - wrapperRect.top + tailRect.height;
+
+            const dropHeight = 65; // vertical offset below elements
+            
+            const pathData = `
+                M ${tailX} ${tailY} 
+                C ${tailX} ${tailY + dropHeight}, 
+                  ${headX} ${headY + dropHeight}, 
+                  ${headX} ${headY}
+            `;
+
+            circularSvg.innerHTML = `
+                <defs>
+                    <marker id="arc-arrow" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto-start-reverse">
+                        <polygon points="6 0, 0 3, 6 6" style="fill: var(--accent-color);"></polygon>
+                    </marker>
+                </defs>
+                <path d="${pathData}" 
+                      fill="none" 
+                      stroke="var(--accent-color)" 
+                      stroke-width="2.5" 
+                      stroke-dasharray="6 4"
+                      style="animation: flowBackward 0.6s linear infinite;"
+                      marker-end="url(#arc-arrow)">
+                </path>
+                <text x="${(headX + tailX)/2}" y="${headY + dropHeight - 12}" 
+                      fill="var(--accent-color)" 
+                      font-size="12" 
+                      font-weight="600" 
+                      text-anchor="middle">
+                    ↩ Circular Link (last.next → head)
+                </text>
+            `;
+        }
+
+        // Redraw arc on resize or scroll
+        window.addEventListener('resize', drawCircularArc);
+        canvasWrapper.addEventListener('scroll', drawCircularArc);
+
+        /* PSEUDOCODE WRITER */
+        function renderPseudocode(op) {
+            pseudocodeContainer.innerHTML = '';
+            const lines = PSEUDOCODE[op] || [];
+            lines.forEach((line, index) => {
+                const div = document.createElement('div');
+                div.className = 'pseudo-line';
+                div.id = `pseudo-line-${index}`;
+                div.innerText = line;
+                pseudocodeContainer.appendChild(div);
+            });
+        }
+
+        function highlightPseudoLine(lineIndex) {
+            document.querySelectorAll('.pseudo-line').forEach(line => line.classList.remove('highlight'));
+            const targetLine = document.getElementById(`pseudo-line-${lineIndex}`);
+            if (targetLine) {
+                targetLine.classList.add('highlight');
+                targetLine.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        }
+
+        /* TIME COMPLEXITY HIGHLIGHTER */
+        function highlightComplexityRow(opId) {
+            document.querySelectorAll('#complexity-table tr').forEach(row => row.classList.remove('highlighted-op'));
+            const targetRow = document.getElementById(opId);
+            if (targetRow) {
+                targetRow.classList.add('highlighted-op');
+            }
+        }
+
+        /* MULTI-LANGUAGE CODE LOADER */
+        let activeLang = 'cpp';
+        function renderCodeBlock(lang) {
+            const code = CODE_ARCHIVE[lang] || '';
+            
+            // Format code with colors
+            let highlighted = code
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/(".*?"|'.*?')/g, '<span class="string">$1</span>')
+                .replace(/(\/\/.*)/g, '<span class="comment">$1</span>')
+                .replace(/\b(class|struct|private|public|typename|int|void|bool|new|delete|class|const|let|def|class|private|public|return|while|for|if|else|throw|runtime_error|Exception|nullptr|null|true|false)\b/g, '<span class="keyword">$1</span>')
+                .replace(/\b(Node|SinglyLinkedList|LinkedList|Node\*|Node\*\*|Node&)\b/g, '<span class="class-name">$1</span>')
+                .replace(/([0-9]+)/g, '<span class="number">$1</span>');
+
+            codePreBox.innerHTML = highlighted;
+        }
+
+        /* INTERACTION & EXPLANATION DETAILS */
+        const EXPLANATIONS = {
+            insertHead: {
+                title: "Insert at Head",
+                desc: "Insert at Head completes in O(1) time. By adjusting the newNode.next pointer directly to the current head, pointer manipulation takes place instantly without traversal requirements."
+            },
+            insertTail: {
+                title: "Insert at Tail",
+                desc: "Insert at Tail runs in O(1) time here because AlgoViz stores an explicit pointer to the tail node. In standard singly linked lists without a tail reference, tail insertion degrades to O(n) due to linear traversal requirements."
+            },
+            insertPos: {
+                title: "Insert at Position",
+                desc: "Insert at Position executes in O(n) average time complexity. The animator must step through elements node by node to locate the predecessor node (index - 1) before splicing in the new reference."
+            },
+            deleteHead: {
+                title: "Delete from Head",
+                desc: "Delete from Head is O(1). We move the list.head reference to the next node and deallocate the former head node. Direct pointer indexing skips all lookups."
+            },
+            deleteTail: {
+                title: "Delete from Tail",
+                desc: "Delete from Tail is O(n) for Singly Lists (since we must traverse from head to find the second-to-last node to update its next pointer to NULL), but O(1) for Doubly Lists (as we use tail.prev directly)."
+            },
+            deleteVal: {
+                title: "Delete by Value",
+                desc: "Delete by Value matches search complexity at O(n). We run a sequential scan across list references, updating the preceding node's next field once the targeted node is found."
+            },
+            search: {
+                title: "Sequential Search",
+                desc: "Search completes in O(n) time. Since node memory is allocated non-contiguously in memory, we cannot perform binary searches. We carry out linear scans checking values sequentially."
+            },
+            traverse: {
+                title: "Traversal",
+                desc: "Traversing the entire list is a linear O(n) operation. We inspect every node sequentially to execute action handlers (e.g. rendering elements, mapping values)."
+            },
+            reverse: {
+                title: "Reversal",
+                desc: "Reversal takes O(n) time. By looping through the list, we flip the links of each node sequentially using three pointer references (prev, current, next) without allocating auxiliary space."
+            }
+        };
+
+        function setExplanation(op) {
+            const exp = EXPLANATIONS[op];
+            if (exp) {
+                algoExplanation.innerHTML = `<strong>${exp.title}</strong>${exp.desc}`;
+            }
+        }
+
+        /* ANIMATED PROCESSES */
+        
+        // 1. INSERT AT HEAD
+        async function runInsertHead(val) {
+            setLock(true);
+            logStatus(`Inserting value ${val} at Head...`, 'info');
+            highlightComplexityRow('row-op-head');
+            renderPseudocode('insertHead');
+            setExplanation('insertHead');
+
+            highlightPseudoLine(1); // newNode = createNode(value)
+            await sleep(currentStepDelay);
+
+            // Dynamically create temporary spacer element to slide nodes right
+            const nodes = list.toArray();
+            let oldHeadElement = null;
+            if (nodes.length > 0) {
+                oldHeadElement = document.getElementById(nodes[0].id);
+            }
+
+            // Perform insert
+            const newNode = list.insertHead(val);
+            renderList();
+
+            // Apply entry animation overrides
+            const newNodeContainer = document.getElementById(`container-${newNode.id}`);
+            if (newNodeContainer) {
+                newNodeContainer.style.animation = 'none'; // clear standard enter
+                newNodeContainer.style.transform = 'translateY(-100px)';
+                newNodeContainer.style.opacity = '0';
+                
+                // Force layout reflow
+                newNodeContainer.offsetHeight;
+
+                // Slide down animation
+                newNodeContainer.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                newNodeContainer.style.transform = 'translateY(0)';
+                newNodeContainer.style.opacity = '1';
+            }
+
+            highlightPseudoLine(2); // newNode.next = list.head
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(3); // list.head = newNode
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(4); // check tail
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(6); // size increment
+            logStatus(`Inserted ${val} successfully at Head!`, 'success');
+            setLock(false);
+            renderList();
+        }
+
+        // 2. INSERT AT TAIL
+        async function runInsertTail(val) {
+            setLock(true);
+            logStatus(`Inserting value ${val} at Tail...`, 'info');
+            highlightComplexityRow('row-op-tail');
+            renderPseudocode('insertTail');
+            setExplanation('insertTail');
+
+            highlightPseudoLine(1); // create node
+            await sleep(currentStepDelay);
+
+            const newNode = list.insertTail(val);
+            renderList();
+
+            // Animate tail node sliding in from right
+            const newNodeContainer = document.getElementById(`container-${newNode.id}`);
+            if (newNodeContainer) {
+                newNodeContainer.style.animation = 'none';
+                newNodeContainer.style.transform = 'translateX(100px)';
+                newNodeContainer.style.opacity = '0';
+                newNodeContainer.offsetHeight;
+
+                newNodeContainer.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                newNodeContainer.style.transform = 'translateX(0)';
+                newNodeContainer.style.opacity = '1';
+            }
+
+            highlightPseudoLine(2); // check empty
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(5); // link updates
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(8); // size++
+            logStatus(`Inserted ${val} successfully at Tail!`, 'success');
+            setLock(false);
+            renderList();
+        }
+
+        // 3. INSERT AT POSITION
+        async function runInsertAt(val, pos) {
+            if (pos < 0 || pos > list.size) {
+                logStatus(`Position ${pos} is out of bounds (0 to ${list.size})`, 'error');
+                return;
+            }
+            if (pos === 0) {
+                await runInsertHead(val);
+                return;
+            }
+            if (pos === list.size) {
+                await runInsertTail(val);
+                return;
+            }
+
+            setLock(true);
+            logStatus(`Preparing to insert ${val} at position ${pos}...`, 'info');
+            highlightComplexityRow('row-op-pos');
+            renderPseudocode('insertPos');
+            setExplanation('insertPos');
+
+            highlightPseudoLine(1); // pos check
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(2); // create node
+            await sleep(currentStepDelay);
+
+            // Traversal animation
+            highlightPseudoLine(3); // current = list.head
+            const nodes = list.toArray();
+            
+            let currNode = nodes[0];
+            let activeNodeCard = document.getElementById(currNode.id);
+            activeNodeCard.classList.add('active-node');
+            logStatus(`Traversing... Setting current pointer to Head (${currNode.data})`, 'info');
+            await sleep(currentStepDelay);
+
+            for (let i = 0; i < pos - 1; i++) {
+                highlightPseudoLine(4); // loop pos
+                await sleep(currentStepDelay);
+
+                // remove active glow, add trail highlight
+                activeNodeCard.classList.remove('active-node');
+                activeNodeCard.classList.add('trail-node');
+
+                currNode = currNode.next;
+                activeNodeCard = document.getElementById(currNode.id);
+                activeNodeCard.classList.add('active-node');
+                logStatus(`Traversing... Step ${i+1}. Current is now node ${currNode.data}`, 'info');
+                
+                highlightPseudoLine(5); // current = current.next
+                await sleep(currentStepDelay);
+            }
+
+            // Create spacer element dynamically before inserting node DOM to slide remaining items
+            const successorNode = currNode.next;
+            const successorContainer = document.getElementById(`container-${successorNode.id}`);
+            const arrowToSucc = document.getElementById(`arrow-wrapper-${currNode.id}`);
+
+            // Insert spacer
+            const spacer = document.createElement('div');
+            spacer.className = 'node-spacer';
+            canvas.insertBefore(spacer, arrowToSucc);
+            
+            // Expand spacer
+            spacer.offsetHeight; // trigger reflow
+            spacer.style.width = '210px'; // size matches arrow + node container width
+            await sleep(400);
+
+            // Perform insert in DS
+            const newNode = list.insertAt(val, pos);
+            renderList();
+
+            // Animate node falling into spacer gap
+            const newNodeContainer = document.getElementById(`container-${newNode.id}`);
+            if (newNodeContainer) {
+                newNodeContainer.style.animation = 'none';
+                newNodeContainer.style.transform = 'translateY(-150px)';
+                newNodeContainer.style.opacity = '0';
+                newNodeContainer.offsetHeight;
+
+                newNodeContainer.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                newNodeContainer.style.transform = 'translateY(0)';
+                newNodeContainer.style.opacity = '1';
+            }
+
+            highlightPseudoLine(6); // newNode.next = current.next
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(7); // current.next = newNode
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(8); // size++
+            logStatus(`Inserted ${val} at position ${pos} successfully!`, 'success');
+            setLock(false);
+            renderList();
+        }
+
+        // 4. DELETE HEAD
+        async function runDeleteHead() {
+            if (list.size === 0) {
+                logStatus("Underflow! Cannot delete from an empty list.", 'error');
+                return;
+            }
+
+            setLock(true);
+            logStatus("Deleting node from Head...", 'info');
+            highlightComplexityRow('row-op-del-head');
+            renderPseudocode('deleteHead');
+            setExplanation('deleteHead');
+
+            highlightPseudoLine(1); // empty check
+            await sleep(currentStepDelay);
+
+            const nodes = list.toArray();
+            const headNode = nodes[0];
+            const headCard = document.getElementById(headNode.id);
+
+            highlightPseudoLine(2); // value = list.head.data
+            headCard.classList.add('delete-active'); // Red glow and shake
+            await sleep(currentStepDelay * 2);
+
+            highlightPseudoLine(3); // list.head = list.head.next
+            if (nodes.length > 1) {
+                // Shift head pointer badge to next node in advance
+                const nextNodeContainer = document.getElementById(`container-${nodes[1].id}`);
+            }
+            await sleep(currentStepDelay);
+
+            // Shrink and fade node
+            headCard.parentElement.style.transition = 'all 0.5s ease';
+            headCard.parentElement.style.width = '0px';
+            headCard.parentElement.style.opacity = '0';
+            headCard.parentElement.style.marginRight = '0px';
+            headCard.parentElement.style.transform = 'scale(0)';
+
+            const arrow = document.getElementById(`arrow-wrapper-${headNode.id}`) || document.getElementById('arrow-to-null');
+            if (arrow) {
+                arrow.style.transition = 'all 0.5s ease';
+                arrow.style.width = '0px';
+                arrow.style.opacity = '0';
+            }
+
+            await sleep(500);
+
+            list.deleteHead();
+            renderList();
+
+            highlightPseudoLine(4); // check tail
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(6); // size--
+            logStatus("Successfully deleted Head node! ✅", 'success');
+            setLock(false);
+        }
+
+        // 5. DELETE TAIL
+        async function runDeleteTail() {
+            if (list.size === 0) {
+                logStatus("Underflow! Cannot delete from an empty list.", 'error');
+                return;
+            }
+            if (list.size === 1) {
+                await runDeleteHead();
+                return;
+            }
+
+            setLock(true);
+            logStatus("Deleting node from Tail...", 'info');
+            highlightComplexityRow('row-op-del-tail');
+            renderPseudocode('deleteTail');
+            setExplanation('deleteTail');
+
+            highlightPseudoLine(1); // empty check
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(2); // size check
+            await sleep(currentStepDelay);
+
+            // Traverse to second-to-last node
+            highlightPseudoLine(5); // current = list.head
+            const nodes = list.toArray();
+            let currNode = nodes[0];
+            let activeCard = document.getElementById(currNode.id);
+            activeCard.classList.add('active-node');
+            await sleep(currentStepDelay);
+
+            while (currNode.next && currNode.next.next) {
+                highlightPseudoLine(6); // loop check
+                await sleep(currentStepDelay);
+
+                activeCard.classList.remove('active-node');
+                activeCard.classList.add('trail-node');
+
+                currNode = currNode.next;
+                activeCard = document.getElementById(currNode.id);
+                activeCard.classList.add('active-node');
+                logStatus(`Traversing... Setting pointer to ${currNode.data}`, 'info');
+
+                highlightPseudoLine(7); // current = current.next
+                await sleep(currentStepDelay);
+            }
+
+            // Target node (tail) glows red
+            const tailNode = currNode.next;
+            const tailCard = document.getElementById(tailNode.id);
+            tailCard.classList.add('delete-active');
+            logStatus(`Tail node ${tailNode.data} selected for removal.`, 'warning');
+            
+            highlightPseudoLine(8); // get tail data
+            await sleep(currentStepDelay * 2);
+
+            highlightPseudoLine(9); // current.next = null
+            const tailArrow = document.getElementById(`arrow-wrapper-${currNode.id}`);
+            if (tailArrow) {
+                tailArrow.style.transition = 'all 0.4s ease';
+                tailArrow.style.opacity = '0';
+            }
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(10); // list.tail = current
+            
+            // Shrink animation on tail node
+            tailCard.parentElement.style.transition = 'all 0.5s ease';
+            tailCard.parentElement.style.width = '0px';
+            tailCard.parentElement.style.opacity = '0';
+            tailCard.parentElement.style.transform = 'scale(0)';
+            await sleep(500);
+
+            list.deleteTail();
+            renderList();
+
+            highlightPseudoLine(11); // size--
+            logStatus("Successfully deleted Tail node! ✅", 'success');
+            setLock(false);
+        }
+
+        // 6. DELETE BY VALUE
+        async function runDeleteByValue(val) {
+            if (list.size === 0) {
+                logStatus("Underflow! List is empty.", 'error');
+                return;
+            }
+
+            const nodes = list.toArray();
+            let targetIdx = -1;
+            for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i].data === val) {
+                    targetIdx = i;
+                    break;
+                }
+            }
+
+            if (targetIdx === -1) {
+                logStatus(`Value ${val} not found in the list!`, 'error');
+                return;
+            }
+
+            if (targetIdx === 0) {
+                await runDeleteHead();
+                return;
+            }
+            if (targetIdx === list.size - 1) {
+                await runDeleteTail();
+                return;
+            }
+
+            setLock(true);
+            logStatus(`Deleting value ${val} (Index ${targetIdx})...`, 'info');
+            highlightComplexityRow('row-op-del-val');
+            renderPseudocode('deleteTail'); // Similar traversal logic
+            setExplanation('deleteVal');
+
+            // Traverse to targetIdx - 1
+            let currNode = nodes[0];
+            let activeCard = document.getElementById(currNode.id);
+            activeCard.classList.add('active-node');
+            await sleep(currentStepDelay);
+
+            for (let i = 0; i < targetIdx - 1; i++) {
+                activeCard.classList.remove('active-node');
+                activeCard.classList.add('trail-node');
+
+                currNode = currNode.next;
+                activeCard = document.getElementById(currNode.id);
+                activeCard.classList.add('active-node');
+                logStatus(`Traversing... Index ${i+1}. Current: ${currNode.data}`, 'info');
+                await sleep(currentStepDelay);
+            }
+
+            // Mark node to delete
+            const targetNode = currNode.next;
+            const targetCard = document.getElementById(targetNode.id);
+            targetCard.classList.add('delete-active');
+            logStatus(`Target node ${targetNode.data} found. Initiating deletion...`, 'warning');
+            await sleep(currentStepDelay * 2);
+
+            // Animate collapse
+            const arrowBefore = document.getElementById(`arrow-wrapper-${currNode.id}`);
+            const arrowAfter = document.getElementById(`arrow-wrapper-${targetNode.id}`);
+
+            if (arrowBefore) {
+                arrowBefore.style.transition = 'all 0.4s ease';
+                arrowBefore.style.opacity = '0';
+            }
+
+            targetCard.parentElement.style.transition = 'all 0.5s ease';
+            targetCard.parentElement.style.width = '0px';
+            targetCard.parentElement.style.opacity = '0';
+            targetCard.parentElement.style.transform = 'scale(0)';
+            await sleep(500);
+
+            list.deleteAt(targetIdx);
+            renderList();
+
+            logStatus(`Node with value ${val} deleted successfully! ✅`, 'success');
+            setLock(false);
+        }
+
+        // 7. TRAVERSE / PRINT
+        async function runTraverse() {
+            if (list.size === 0) {
+                logStatus("List is empty. Nothing to traverse.", 'warning');
+                return;
+            }
+
+            setLock(true);
+            logStatus("Starting traversal...", 'info');
+            highlightComplexityRow('row-op-traverse');
+            renderPseudocode('search'); // uses traverse/loop lines
+            setExplanation('traverse');
+
+            highlightPseudoLine(1); // current = list.head
+            const nodes = list.toArray();
+            
+            // Add visual pointer float badge
+            let floatBadge = document.getElementById('ptr-badge-curr');
+            if (!floatBadge) {
+                floatBadge = document.createElement('div');
+                floatBadge.className = 'pointer-badge ptr-curr';
+                floatBadge.id = 'ptr-badge-curr';
+                floatBadge.innerHTML = '👉 current';
+                canvasWrapper.appendChild(floatBadge);
+            }
+
+            for (let i = 0; i < nodes.length; i++) {
+                highlightPseudoLine(3); // loop check
+                const node = nodes[i];
+                const card = document.getElementById(node.id);
+                
+                // Align pointer badge directly below node card
+                const cardRect = card.getBoundingClientRect();
+                const wrapperRect = canvasWrapper.getBoundingClientRect();
+                floatBadge.style.left = `${cardRect.left - wrapperRect.left + (cardRect.width / 2) + canvasWrapper.scrollLeft}px`;
+                floatBadge.style.display = 'flex';
+
+                card.classList.add('active-node');
+                logStatus(`Visiting node at position ${i} | Value: ${node.data}`, 'info');
+                await sleep(currentStepDelay);
+
+                card.classList.remove('active-node');
+                card.classList.add('trail-node');
+
+                highlightPseudoLine(6); // current = current.next
+            }
+
+            // Move float pointer to null
+            logStatus("Reached end of list (NULL)", 'info');
+            floatBadge.style.display = 'none';
+
+            await sleep(currentStepDelay);
+            renderList(); // clear traversal states
+            logStatus("List traversed successfully! 🔄", 'success');
+            setLock(false);
+        }
+
+        // 8. SEARCH
+        async function runSearch(val) {
+            if (list.size === 0) {
+                logStatus("List is empty. Search terminated.", 'warning');
+                return;
+            }
+
+            setLock(true);
+            logStatus(`Initiating search scan for value ${val}...`, 'search');
+            highlightComplexityRow('row-op-search');
+            renderPseudocode('search');
+            setExplanation('search');
+
+            highlightPseudoLine(1); // current = head
+            const nodes = list.toArray();
+            let foundIdx = -1;
+
+            let floatBadge = document.getElementById('ptr-badge-curr');
+            if (!floatBadge) {
+                floatBadge = document.createElement('div');
+                floatBadge.className = 'pointer-badge ptr-curr';
+                floatBadge.id = 'ptr-badge-curr';
+                floatBadge.innerHTML = '👉 current';
+                canvasWrapper.appendChild(floatBadge);
+            }
+
+            for (let i = 0; i < nodes.length; i++) {
+                highlightPseudoLine(3); // loop check
+                const node = nodes[i];
+                const card = document.getElementById(node.id);
+
+                // Align pointer badge
+                const cardRect = card.getBoundingClientRect();
+                const wrapperRect = canvasWrapper.getBoundingClientRect();
+                floatBadge.style.left = `${cardRect.left - wrapperRect.left + (cardRect.width / 2) + canvasWrapper.scrollLeft}px`;
+                floatBadge.style.display = 'flex';
+
+                card.classList.add('active-node');
+                logStatus(`Scanning index ${i} | Comparing node ${node.data} == ${val}?`, 'search');
+
+                // Render comparison tooltip overlay
+                const compareTooltip = document.createElement('div');
+                compareTooltip.className = 'comparison-tooltip';
+                compareTooltip.innerText = `${node.data} =? ${val}`;
+                card.appendChild(compareTooltip);
+
+                await sleep(currentStepDelay * 1.5);
+                compareTooltip.remove();
+
+                if (node.data === val) {
+                    highlightPseudoLine(4); // Match found
+                    card.classList.remove('active-node');
+                    card.classList.add('found-node'); // Green glowing explosion
+                    logStatus(`Value ${val} found at position ${i}! 🔍`, 'success');
+                    foundIdx = i;
+                    floatBadge.style.display = 'none';
+                    break;
+                }
+
+                card.classList.remove('active-node');
+                card.classList.add('trail-node');
+                highlightPseudoLine(5); // current = current.next
+            }
+
+            if (foundIdx === -1) {
+                highlightPseudoLine(8); // return Not Found
+                logStatus(`Value ${val} not found in Linked List ❌`, 'error');
+                floatBadge.style.display = 'none';
+                
+                // Shake all cards red once
+                nodes.forEach(node => {
+                    const card = document.getElementById(node.id);
+                    if (card) card.classList.add('delete-active');
+                });
+                await sleep(600);
+                nodes.forEach(node => {
+                    const card = document.getElementById(node.id);
+                    if (card) card.classList.remove('delete-active');
+                });
+            }
+
+            setLock(false);
+            // We do not immediately redraw to preserve the found green glow highlight state
+        }
+
+        // 9. REVERSE (THE SHOW STOPPER!)
+        async function runReverse() {
+            if (list.size <= 1) {
+                logStatus("Reverse needs at least 2 nodes.", 'warning');
+                return;
+            }
+
+            setLock(true);
+            logStatus("Initiating Pointer Reversal... Syncing step by step.", 'reverse');
+            highlightComplexityRow('row-op-reverse');
+            renderPseudocode('reverse');
+            setExplanation('reverse');
+
+            const nodes = list.toArray();
+
+            // Create 3 visual pointer badges
+            let badgePrev = document.createElement('div');
+            badgePrev.className = 'pointer-badge ptr-prev';
+            badgePrev.id = 'badge-prev';
+            badgePrev.innerHTML = '👈 prev (null)';
+            canvasWrapper.appendChild(badgePrev);
+
+            let badgeCurr = document.createElement('div');
+            badgeCurr.className = 'pointer-badge ptr-curr';
+            badgeCurr.id = 'badge-curr';
+            badgeCurr.innerHTML = '👉 current';
+            canvasWrapper.appendChild(badgeCurr);
+
+            let badgeNext = document.createElement('div');
+            badgeNext.className = 'pointer-badge ptr-next';
+            badgeNext.id = 'badge-next';
+            badgeNext.innerHTML = '👉 next';
+            canvasWrapper.appendChild(badgeNext);
+
+            // Function to align badge with node index (or null offscreen)
+            function alignBadge(badge, nodeIdx, labelText) {
+                if (nodeIdx === -1 || nodeIdx >= nodes.length) {
+                    badge.style.display = 'none';
+                    return;
+                }
+                const card = document.getElementById(nodes[nodeIdx].id);
+                const cardRect = card.getBoundingClientRect();
+                const wrapperRect = canvasWrapper.getBoundingClientRect();
+                badge.style.left = `${cardRect.left - wrapperRect.left + (cardRect.width / 2) + canvasWrapper.scrollLeft}px`;
+                badge.style.display = 'flex';
+                badge.innerHTML = labelText;
+            }
+
+            // 1. Initial pointer settings
+            highlightPseudoLine(1); // prev = null
+            alignBadge(badgePrev, -1);
+            logStatus("Setting prev = null", 'reverse');
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(2); // current = list.head
+            alignBadge(badgeCurr, 0, '👉 current');
+            logStatus("Setting current = list.head", 'reverse');
+            await sleep(currentStepDelay);
+
+            highlightPseudoLine(3); // list.tail = list.head
+            logStatus("Flipping tail tracker...", 'reverse');
+            await sleep(currentStepDelay);
+
+            let prevIdx = -1;
+            let currIdx = 0;
+            let nextIdx = -1;
+
+            while (currIdx !== -1 && currIdx < nodes.length) {
+                highlightPseudoLine(4); // loop check (current != null)
+                await sleep(currentStepDelay);
+
+                // next = current.next
+                nextIdx = currIdx + 1;
+                highlightPseudoLine(5); 
+                alignBadge(badgeNext, nextIdx, '👉 next');
+                logStatus(`Caching next node: current.next`, 'reverse');
+                await sleep(currentStepDelay * 1.5);
+
+                // current.next = prev
+                highlightPseudoLine(6); 
+                logStatus(`Flipping pointer! current.next → prev`, 'reverse');
+                
+                // Flip the arrow visually in the DOM
+                if (currIdx > 0) {
+                    const prevNode = nodes[prevIdx];
+                    const arrowLine = document.querySelector(`#arrow-wrapper-${prevNode.id} .arrow-line.forward`);
+                    const arrowHead = document.querySelector(`#arrow-wrapper-${prevNode.id} .arrow-head`);
+                    
+                    if (arrowLine) {
+                        arrowLine.classList.remove('forward');
+                        arrowLine.classList.add('reversed');
+                        // Rotate arrow head and line visually to point left
+                        arrowLine.setAttribute('d', 'M 65,40 L 5,40');
+                    }
+                    if (arrowHead) {
+                        arrowHead.classList.add('reversed');
+                    }
+                }
+                await sleep(currentStepDelay * 2);
+
+                // prev = current
+                prevIdx = currIdx;
+                highlightPseudoLine(7); 
+                alignBadge(badgePrev, prevIdx, '👈 prev');
+                logStatus("Advancing prev pointer to current", 'reverse');
+                await sleep(currentStepDelay);
+
+                // current = next
+                currIdx = (nextIdx < nodes.length) ? nextIdx : -1;
+                highlightPseudoLine(8); 
+                alignBadge(badgeCurr, currIdx, '👉 current');
+                logStatus("Advancing current pointer to next", 'reverse');
+                await sleep(currentStepDelay);
+            }
+
+            // Final pointer slide to Head
+            highlightPseudoLine(9); // list.head = prev
+            logStatus("Assigning Head to prev node... Completed!", 'success');
+            await sleep(currentStepDelay * 1.5);
+
+            // Remove float indicators
+            badgePrev.remove();
+            badgeCurr.remove();
+            badgeNext.remove();
+
+            // Reconstruct actual LL items
+            const newHeadVal = list.tail.data; // temp reference
+
+            // Rebuild LinkedList model order
+            const reversedNodes = list.toArray().reverse();
+            list.clear();
+            reversedNodes.forEach(node => {
+                list.insertTail(node.data);
+            });
+
+            // Smooth rebuild reflow fade
+            canvas.style.transition = 'opacity 0.4s ease';
+            canvas.style.opacity = '0';
+            await sleep(400);
+            renderList();
+            canvas.style.opacity = '1';
+
+            logStatus("List reversed successfully! 🔄", 'success');
+            setLock(false);
+        }
+
+        /* EVENT ATTACHMENTS & INTERACTIVE BOOTSTRAP */
+        
+        // Speed Adjuster
+        speedSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            if (val === 0) {
+                currentStepDelay = 1000;
+                speedText.innerText = 'Slow';
+            } else if (val === 1) {
+                currentStepDelay = 400;
+                speedText.innerText = 'Med';
+            } else {
+                currentStepDelay = 100;
+                speedText.innerText = 'Fast';
+            }
+        });
+
+        // Initialize default loaded list [10 -> 20 -> 30 -> 40]
+        function initList() {
+            list.clear();
+            list.insertTail(10);
+            list.insertTail(20);
+            list.insertTail(30);
+            list.insertTail(40);
+            renderList();
+        }
+
+        // Pill switches
+        document.querySelectorAll('.type-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (isAnimating) return;
+                document.querySelectorAll('.type-toggle-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                listType = btn.getAttribute('data-type');
+                
+                // Fade effect on type swap
+                canvas.style.transition = 'opacity 0.3s ease';
+                canvas.style.opacity = '0';
+                setTimeout(() => {
+                    initList();
+                    canvas.style.opacity = '1';
+                }, 300);
+                
+                logStatus(`Switched view to ${listType.toUpperCase()} Linked List. Visualization rebuilt.`, 'info');
+            });
+        });
+
+        // Hamburger Menu Toggle
+        document.getElementById('hamburger-menu').addEventListener('click', () => {
+            document.getElementById('nav-links-menu').classList.toggle('active');
+        });
+
+        // Operational Actions
+        btns.insertHead.addEventListener('click', () => {
+            const val = parseInt(valInput.value);
+            if (isNaN(val)) {
+                logStatus("Please input a valid integer value.", 'error');
+                return;
+            }
+            runInsertHead(val);
+            valInput.value = '';
+        });
+
+        btns.insertTail.addEventListener('click', () => {
+            const val = parseInt(valInput.value);
+            if (isNaN(val)) {
+                logStatus("Please input a valid integer value.", 'error');
+                return;
+            }
+            runInsertTail(val);
+            valInput.value = '';
+        });
+
+        btns.insertPos.addEventListener('click', () => {
+            const val = parseInt(valInput.value);
+            const pos = parseInt(posInput.value);
+            if (isNaN(val)) {
+                logStatus("Please enter a value to insert.", 'error');
+                return;
+            }
+            if (isNaN(pos) || pos < 0) {
+                logStatus("Please enter a valid 0-based position.", 'error');
+                return;
+            }
+            runInsertAt(val, pos);
+            valInput.value = '';
+            posInput.value = '';
+        });
+
+        btns.deleteHead.addEventListener('click', () => {
+            runDeleteHead();
+        });
+
+        btns.deleteTail.addEventListener('click', () => {
+            runDeleteTail();
+        });
+
+        btns.deleteVal.addEventListener('click', () => {
+            const val = parseInt(valInput.value);
+            if (isNaN(val)) {
+                logStatus("Enter a value to delete.", 'error');
+                return;
+            }
+            runDeleteByValue(val);
+            valInput.value = '';
+        });
+
+        btns.search.addEventListener('click', () => {
+            const val = parseInt(valInput.value);
+            if (isNaN(val)) {
+                logStatus("Please input a search query value.", 'error');
+                return;
+            }
+            runSearch(val);
+            valInput.value = '';
+        });
+
+        btns.traverse.addEventListener('click', () => {
+            runTraverse();
+        });
+
+        btns.reverse.addEventListener('click', () => {
+            runReverse();
+        });
+
+        btns.clear.addEventListener('click', () => {
+            list.clear();
+            renderList();
+            logStatus("Visualizer canvas cleared.", 'info');
+        });
+
+        // Pseudocode selection tabs
+        document.querySelectorAll('#pseudo-tabs .panel-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#pseudo-tabs .panel-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderPseudocode(btn.getAttribute('data-op'));
+            });
+        });
+
+        // Programming Code tabs
+        document.querySelectorAll('#code-tabs .panel-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#code-tabs .panel-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeLang = btn.getAttribute('data-lang');
+                renderCodeBlock(activeLang);
+            });
+        });
+
+        // Copy Clipboard utility
+        copyCodeBtn.addEventListener('click', () => {
+            const code = CODE_ARCHIVE[activeLang] || '';
+            navigator.clipboard.writeText(code).then(() => {
+                const prevText = copyCodeBtn.innerText;
+                copyCodeBtn.innerText = 'Copied!';
+                copyCodeBtn.style.backgroundColor = 'var(--head-color)';
+                setTimeout(() => {
+                    copyCodeBtn.innerText = prevText;
+                    copyCodeBtn.style.backgroundColor = '';
+                }, 1500);
+            });
+        });
+
+        /* LOAD APP */
+        initList();
+        renderPseudocode('insertHead');
+        renderCodeBlock('cpp');
+
+    </script>
+</body>
+</html>

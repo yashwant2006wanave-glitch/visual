@@ -1,0 +1,2922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graph Visualizer | AlgoViz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --canvas: #0b0f19;
+      --panel: #1e293b;
+      --panel-soft: #172033;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #6366f1;
+      --accent-strong: #a5b4fc;
+      --secondary: #22d3ee;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --danger: #ef4444;
+      --purple: #a855f7;
+      --node-default: #1e293b;
+      --node-source: #1e3a5f;
+      --node-target: #3b0764;
+      --node-visited: #166534;
+      --node-current: #6366f1;
+      --node-queue: #78350f;
+      --shadow: 0 22px 70px rgba(2, 6, 23, 0.34);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.14) 1px, transparent 0) 0 0 / 28px 28px,
+        linear-gradient(135deg, rgba(99, 102, 241, 0.14), transparent 34rem),
+        var(--bg);
+    }
+
+    body.menu-open { overflow: hidden; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled, input:disabled, select:disabled { cursor: not-allowed; opacity: 0.58; }
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.8);
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      width: min(1500px, calc(100% - 32px));
+      min-height: 72px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--accent-strong);
+      font-weight: 800;
+      font-size: 1.08rem;
+    }
+
+    .logo-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.36);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 0 13px;
+      border-radius: 8px;
+      color: var(--muted);
+      font-weight: 700;
+      transition: color 180ms ease, background 180ms ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--accent-strong);
+      background: rgba(99, 102, 241, 0.13);
+    }
+
+    .hamburger {
+      display: none;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--text);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .hamburger span {
+      width: 18px;
+      height: 2px;
+      border-radius: 99px;
+      background: currentColor;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .menu-open .hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .menu-open .hamburger span:nth-child(2) { opacity: 0; }
+    .menu-open .hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .hero {
+      padding: 46px 0 22px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(2.4rem, 5vw, 5.3rem);
+      line-height: 0.94;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 780px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.22rem);
+      line-height: 1.65;
+    }
+
+    .pill-row,
+    .toggle-row,
+    .toolbar,
+    .tabs,
+    .preset-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .pill,
+    .tool-button,
+    .tab-button,
+    .preset-button,
+    .control-button,
+    .canvas-button,
+    .toggle-button {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      background: rgba(30, 41, 59, 0.74);
+      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
+    }
+
+    .pill {
+      min-height: 42px;
+      padding: 0 15px;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .toggle-button {
+      min-height: 38px;
+      padding: 0 13px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .pill.active,
+    .tool-button.active,
+    .tab-button.active,
+    .toggle-button.active {
+      border-color: rgba(99, 102, 241, 0.9);
+      color: white;
+      background: rgba(99, 102, 241, 0.28);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.13);
+    }
+
+    .pill:hover,
+    .tool-button:hover,
+    .tab-button:hover,
+    .preset-button:hover,
+    .control-button:hover,
+    .canvas-button:hover,
+    .toggle-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(34, 211, 238, 0.7);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(560px, 1.75fr) minmax(330px, 0.85fr);
+      gap: 20px;
+      align-items: start;
+      margin-top: 18px;
+    }
+
+    .panel {
+      border: 1px solid rgba(51, 65, 85, 0.84);
+      border-radius: var(--radius);
+      background: rgba(30, 41, 59, 0.88);
+      box-shadow: var(--shadow);
+    }
+
+    .canvas-panel {
+      overflow: hidden;
+    }
+
+    .canvas-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+    }
+
+    .instruction {
+      color: var(--secondary);
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .tool-button {
+      min-height: 36px;
+      padding: 0 11px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      min-height: 610px;
+      background:
+        radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.17) 1px, transparent 0) 0 0 / 24px 24px,
+        var(--canvas);
+      overflow: hidden;
+    }
+
+    .progress-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      z-index: 4;
+      background: rgba(51, 65, 85, 0.7);
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--secondary));
+      transition: width 220ms ease;
+      box-shadow: 0 0 18px rgba(34, 211, 238, 0.55);
+    }
+
+    #graphSvg {
+      display: block;
+      width: 100%;
+      min-height: 610px;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .svg-node {
+      filter: drop-shadow(0 0 14px rgba(99, 102, 241, 0.24));
+      transition: fill 180ms ease, stroke 180ms ease, filter 180ms ease, transform 180ms ease;
+    }
+
+    .svg-node.node-source { fill: var(--node-source); stroke: var(--secondary); filter: drop-shadow(0 0 16px rgba(34, 211, 238, 0.6)); }
+    .svg-node.node-target { fill: var(--node-target); stroke: var(--purple); filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.6)); }
+    .svg-node.node-visited { fill: var(--node-visited); stroke: var(--green); filter: drop-shadow(0 0 14px rgba(34, 197, 94, 0.52)); }
+    .svg-node.node-current { fill: var(--node-current); stroke: var(--accent-strong); filter: drop-shadow(0 0 20px rgba(165, 180, 252, 0.72)); animation: pulseNode 760ms ease-in-out infinite; }
+    .svg-node.node-queue { fill: var(--node-queue); stroke: var(--amber); filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.5)); }
+    .svg-node.node-path { fill: var(--node-source); stroke: var(--secondary); filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.72)); }
+    .svg-node.selected { stroke-width: 4; filter: drop-shadow(0 0 24px rgba(34, 211, 238, 0.7)); }
+
+    .node-text,
+    .node-badge {
+      fill: white;
+      font-weight: 900;
+      font-size: 14px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+    }
+
+    .node-badge {
+      font-size: 9px;
+      fill: var(--secondary);
+    }
+
+    .svg-edge {
+      stroke: var(--border);
+      stroke-width: 2.5;
+      transition: stroke 180ms ease, stroke-width 180ms ease, opacity 180ms ease, filter 180ms ease;
+    }
+
+    .svg-edge.edge-traversed {
+      stroke: var(--accent);
+      stroke-dasharray: 10 8;
+      animation: dashFlow 600ms linear infinite;
+    }
+
+    .svg-edge.edge-relax {
+      stroke: var(--amber);
+      stroke-width: 4;
+      filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.6));
+    }
+
+    .svg-edge.edge-shortest {
+      stroke: var(--secondary);
+      stroke-width: 5;
+      filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.68));
+    }
+
+    .svg-edge.edge-mst {
+      stroke: var(--green);
+      stroke-width: 5;
+      filter: drop-shadow(0 0 15px rgba(34, 197, 94, 0.55));
+    }
+
+    .svg-edge.edge-skip {
+      stroke: var(--danger);
+      stroke-width: 4;
+      animation: redFlash 360ms ease;
+    }
+
+    .weight-pill {
+      fill: rgba(15, 23, 42, 0.92);
+      stroke: rgba(148, 163, 184, 0.35);
+    }
+
+    .weight-label {
+      fill: var(--muted);
+      font-family: "Fira Code", monospace;
+      font-size: 11px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+    }
+
+    .canvas-controls {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      display: flex;
+      gap: 8px;
+      z-index: 6;
+    }
+
+    .canvas-button {
+      min-width: 40px;
+      min-height: 38px;
+      padding: 0 10px;
+      color: var(--text);
+      font-weight: 900;
+      background: rgba(15, 23, 42, 0.84);
+      backdrop-filter: blur(10px);
+    }
+
+    .weight-popup,
+    .context-menu,
+    .node-tooltip {
+      position: absolute;
+      z-index: 20;
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.96);
+      box-shadow: var(--shadow);
+    }
+
+    .weight-popup {
+      display: none;
+      gap: 8px;
+      padding: 10px;
+      align-items: center;
+    }
+
+    .weight-popup.active { display: flex; }
+    .weight-popup input {
+      width: 68px;
+      min-height: 34px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      background: #0f172a;
+      padding: 0 8px;
+      outline: none;
+    }
+
+    .weight-popup button {
+      min-height: 34px;
+      border: 0;
+      border-radius: 8px;
+      color: white;
+      background: var(--accent);
+      font-weight: 800;
+      padding: 0 10px;
+    }
+
+    .context-menu {
+      display: none;
+      min-width: 170px;
+      overflow: hidden;
+    }
+
+    .context-menu.active { display: block; }
+    .context-menu button {
+      display: block;
+      width: 100%;
+      min-height: 38px;
+      border: 0;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: var(--text);
+      text-align: left;
+      background: transparent;
+      padding: 0 12px;
+    }
+    .context-menu button:hover { background: rgba(99, 102, 241, 0.18); }
+
+    .node-tooltip {
+      display: none;
+      max-width: 260px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 0.8rem;
+      line-height: 1.5;
+      pointer-events: none;
+    }
+    .node-tooltip.active { display: block; }
+
+    .representation {
+      border-top: 1px solid rgba(51, 65, 85, 0.7);
+      padding: 16px;
+      background: rgba(15, 23, 42, 0.38);
+    }
+
+    .representation-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .representation-title,
+    .panel-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .representation-output {
+      overflow: auto;
+      max-height: 260px;
+      border: 1px solid rgba(51, 65, 85, 0.76);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.62);
+      padding: 12px;
+      color: #cbd5e1;
+      font-family: "Fira Code", monospace;
+      font-size: 0.84rem;
+      line-height: 1.65;
+      white-space: pre;
+    }
+
+    .side-panel {
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat-card {
+      border: 1px solid rgba(51, 65, 85, 0.78);
+      border-radius: 8px;
+      padding: 10px;
+      background: rgba(15, 23, 42, 0.46);
+    }
+
+    .stat-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .stat-card strong {
+      display: block;
+      margin-top: 6px;
+      font-family: "Fira Code", monospace;
+      font-size: 0.98rem;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label,
+    .sub-label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    select,
+    .range {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      background: #0f172a;
+      padding: 0 10px;
+      outline: none;
+    }
+
+    .control-button {
+      min-height: 42px;
+      padding: 0 12px;
+      font-weight: 900;
+    }
+
+    .control-button.primary {
+      border-color: transparent;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), #4f46e5);
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .speed-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .speed-row strong { color: var(--secondary); }
+    input[type="range"] { accent-color: var(--accent); }
+
+    .state-box {
+      border: 1px solid rgba(51, 65, 85, 0.76);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(15, 23, 42, 0.46);
+      min-height: 120px;
+    }
+
+    .chip-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .state-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 9px;
+      border: 1px solid rgba(51, 65, 85, 0.84);
+      border-radius: 999px;
+      color: var(--text);
+      background: rgba(30, 41, 59, 0.82);
+      font-family: "Fira Code", monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .state-chip.queue { border-color: var(--amber); color: #fde68a; }
+    .state-chip.visited { border-color: var(--green); color: #bbf7d0; }
+    .state-chip.path { border-color: var(--secondary); color: #cffafe; }
+
+    .small-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 9px;
+      font-size: 0.78rem;
+    }
+    .small-table th,
+    .small-table td {
+      border-bottom: 1px solid rgba(51, 65, 85, 0.66);
+      padding: 7px 6px;
+      text-align: left;
+    }
+    .small-table th { color: #cbd5e1; }
+    .small-table td { color: var(--muted); font-family: "Fira Code", monospace; }
+
+    .result-panel {
+      border-left: 4px solid var(--secondary);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(34, 211, 238, 0.08);
+      min-height: 96px;
+      color: #cbd5e1;
+      line-height: 1.55;
+      font-size: 0.9rem;
+    }
+
+    .preset-button {
+      flex: 1 1 145px;
+      min-height: 40px;
+      padding: 0 11px;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .section {
+      margin-top: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(51, 65, 85, 0.84);
+      border-radius: 8px;
+      background: rgba(30, 41, 59, 0.88);
+      box-shadow: var(--shadow);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.72);
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .tab-button {
+      min-height: 36px;
+      padding: 0 11px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .pseudo-wrap,
+    .code-wrap {
+      padding: 16px 18px 20px;
+      background: rgba(15, 23, 42, 0.4);
+      overflow: auto;
+    }
+
+    .pseudo-code {
+      display: grid;
+      gap: 4px;
+      margin: 0;
+      font-family: "Fira Code", monospace;
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+
+    .pseudo-line {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 12px;
+      border-radius: 8px;
+      padding: 4px 10px;
+      color: #cbd5e1;
+      transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+    }
+    .pseudo-line span:first-child {
+      color: #64748b;
+      text-align: right;
+      user-select: none;
+    }
+    .pseudo-line.active {
+      color: white;
+      background: rgba(99, 102, 241, 0.24);
+      box-shadow: inset 3px 0 0 var(--accent);
+      transform: translateX(2px);
+    }
+
+    .code-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.72);
+      background: rgba(15, 23, 42, 0.72);
+    }
+
+    .copy-button {
+      border: 1px solid rgba(34, 211, 238, 0.4);
+      border-radius: 8px;
+      color: var(--secondary);
+      background: rgba(34, 211, 238, 0.08);
+      min-height: 34px;
+      padding: 0 11px;
+      font-weight: 800;
+    }
+
+    .code-block {
+      min-width: 720px;
+      margin: 0;
+      color: #dbeafe;
+      font-family: "Fira Code", monospace;
+      font-size: 0.82rem;
+      line-height: 1.65;
+      white-space: pre;
+    }
+
+    .comparison-wrap {
+      padding: 18px;
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid rgba(51, 65, 85, 0.76);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.46);
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.68);
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    .data-table th {
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, 0.62);
+    }
+    .data-table tr:last-child td { border-bottom: 0; }
+    .data-table tr.active-row td {
+      background: rgba(99, 102, 241, 0.18);
+      color: white;
+    }
+
+    .algorithm-compare {
+      display: grid;
+      gap: 16px;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.36);
+    }
+
+    .compare-controls {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .compare-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .compare-card {
+      border: 1px solid rgba(51, 65, 85, 0.84);
+      border-radius: 8px;
+      padding: 16px;
+      background: rgba(15, 23, 42, 0.52);
+    }
+
+    .compare-card.winner {
+      border-color: rgba(34, 211, 238, 0.76);
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1), 0 18px 42px rgba(2, 6, 23, 0.28);
+    }
+
+    .compare-card h3 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    .winner-badge {
+      display: none;
+      border: 1px solid rgba(34, 211, 238, 0.6);
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: var(--secondary);
+      background: rgba(34, 211, 238, 0.09);
+      font-size: 0.7rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .compare-card.winner .winner-badge {
+      display: inline-flex;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .metric {
+      border: 1px solid rgba(51, 65, 85, 0.66);
+      border-radius: 8px;
+      padding: 9px;
+      background: rgba(30, 41, 59, 0.52);
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 5px;
+      color: var(--text);
+      font-family: "Fira Code", monospace;
+      font-size: 0.82rem;
+      word-break: break-word;
+    }
+
+    .compare-summary {
+      color: #cbd5e1;
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+
+    .compare-note {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+
+    .apps {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      padding: 18px;
+    }
+
+    .app-card {
+      min-height: 170px;
+      border: 1px solid rgba(51, 65, 85, 0.84);
+      border-radius: 8px;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.45);
+      transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+    }
+    .app-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(99, 102, 241, 0.8);
+      box-shadow: 0 24px 54px rgba(2, 6, 23, 0.34), 0 0 26px rgba(99, 102, 241, 0.16);
+    }
+    .app-card span { font-size: 1.9rem; }
+    .app-card h3 { margin: 13px 0 8px; font-size: 1rem; }
+    .app-card p { margin: 0; color: var(--muted); line-height: 1.55; font-size: 0.9rem; }
+
+    .footer {
+      margin-top: 28px;
+      padding: 30px 0 40px;
+      color: var(--muted);
+    }
+    .footer-inner {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-links a.active { color: var(--secondary); font-weight: 800; }
+
+    @keyframes pulseNode {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -36; }
+    }
+    @keyframes nodeEnter {
+      0% { transform: scale(0); opacity: 0; }
+      70% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes redFlash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .node-enter { animation: nodeEnter 360ms cubic-bezier(0.2, 1.2, 0.36, 1) both; }
+
+    .confetti {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 99px;
+      pointer-events: none;
+      animation: confetti 820ms ease-out forwards;
+      z-index: 18;
+    }
+    @keyframes confetti {
+      to { transform: translate(var(--dx), var(--dy)) scale(0.3); opacity: 0; }
+    }
+
+    @media (max-width: 1200px) {
+      .layout { grid-template-columns: 1fr; }
+      .canvas-wrap, #graphSvg { min-height: 560px; }
+      .apps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 768px) {
+      .page, .nav-inner, .footer-inner { width: min(100% - 24px, 720px); }
+      .hamburger { display: inline-flex; }
+      .nav-links {
+        position: fixed;
+        top: 72px;
+        right: 12px;
+        left: 12px;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.97);
+        box-shadow: var(--shadow);
+      }
+      .menu-open .nav-links { display: flex; }
+      .nav-links a { justify-content: center; }
+      .hero { padding-top: 34px; }
+      .canvas-header, .section-header, .code-toolbar { align-items: flex-start; flex-direction: column; }
+      .canvas-wrap, #graphSvg { min-height: 330px; }
+      .field-grid, .control-grid, .stat-grid { grid-template-columns: 1fr; }
+      .apps { grid-template-columns: 1fr; }
+      .representation-header { flex-direction: column; align-items: flex-start; }
+      .compare-controls,
+      .compare-card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" aria-label="Primary navigation">
+    <div class="nav-inner">
+      <a class="logo" href="stack.html" aria-label="AlgoViz home">
+        <span class="logo-mark">AV</span>
+        <span>AlgoViz</span>
+      </a>
+      <button class="hamburger" id="menuButton" type="button" aria-label="Open navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="array.html">Arrays</a></li>
+        <li><a href="stack.html">Stack</a></li>
+        <li><a href="queue.html">Queue</a></li>
+        <li><a href="linkedlist.html">Linked List</a></li>
+        <li><a href="tree.html">Trees</a></li>
+        <li><a class="active" href="graph.html">Graphs</a></li>
+        <li><a href="sorting.html">Sorting</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="page" id="top">
+    <header class="hero">
+      <h1>Graph Visualizer</h1>
+      <p>Build graphs interactively and watch algorithms find paths in real time</p>
+      <div class="pill-row" id="algorithmPills" aria-label="Algorithm selectors"></div>
+      <div class="toggle-row" aria-label="Graph type toggles">
+        <button class="toggle-button active" id="undirectedButton" type="button">Undirected</button>
+        <button class="toggle-button" id="directedButton" type="button">Directed</button>
+        <button class="toggle-button active" id="unweightedButton" type="button">Unweighted</button>
+        <button class="toggle-button" id="weightedButton" type="button">Weighted</button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <div class="panel canvas-panel">
+        <div class="canvas-header">
+          <div class="toolbar" id="toolButtons" aria-label="Canvas tools"></div>
+          <div class="instruction" id="instructionText">Click canvas to add node</div>
+        </div>
+        <div class="canvas-wrap" id="canvasWrap">
+          <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+          <svg id="graphSvg" aria-label="Interactive graph canvas">
+            <defs>
+              <marker id="arrowHead" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                <path d="M0,0 L9,4.5 L0,9 Z" fill="#94a3b8"></path>
+              </marker>
+              <marker id="arrowHeadActive" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                <path d="M0,0 L9,4.5 L0,9 Z" fill="#22d3ee"></path>
+              </marker>
+            </defs>
+            <g id="viewport">
+              <g id="edgesLayer"></g>
+              <g id="nodesLayer"></g>
+            </g>
+          </svg>
+          <div class="canvas-controls">
+            <button class="canvas-button" id="zoomInButton" type="button" title="Zoom In">+</button>
+            <button class="canvas-button" id="zoomOutButton" type="button" title="Zoom Out">-</button>
+            <button class="canvas-button" id="fitButton" type="button" title="Fit">FIT</button>
+            <button class="canvas-button" id="deleteButton" type="button" title="Delete selected">🗑️</button>
+            <button class="canvas-button" id="undoButton" type="button" title="Undo">↩</button>
+          </div>
+          <div class="weight-popup" id="weightPopup">
+            <input id="weightInput" type="number" min="1" max="99" value="1" aria-label="Edge weight">
+            <button id="weightSaveButton" type="button">Add</button>
+          </div>
+          <div class="context-menu" id="contextMenu"></div>
+          <div class="node-tooltip" id="nodeTooltip"></div>
+        </div>
+        <div class="representation">
+          <div class="representation-header">
+            <h2 class="representation-title">Graph Representation</h2>
+            <div class="tabs">
+              <button class="tab-button active" id="matrixButton" type="button">Adjacency Matrix</button>
+              <button class="tab-button" id="listButton" type="button">Adjacency List</button>
+            </div>
+          </div>
+          <pre class="representation-output" id="representationOutput"></pre>
+        </div>
+      </div>
+
+      <aside class="panel side-panel">
+        <section>
+          <h2 class="panel-title">Graph Statistics</h2>
+          <div class="stat-grid" id="statsGrid"></div>
+        </section>
+
+        <section>
+          <h2 class="panel-title">Source &amp; Target</h2>
+          <div class="field-grid" style="margin-top: 10px;">
+            <div class="field">
+              <label for="sourceSelect">Source Node</label>
+              <select id="sourceSelect"></select>
+            </div>
+            <div class="field" id="targetField">
+              <label for="targetSelect">Target Node</label>
+              <select id="targetSelect"></select>
+            </div>
+          </div>
+          <div style="display: grid; gap: 9px; margin-top: 12px;">
+            <button class="control-button primary" id="runButton" type="button">▶ Run Algorithm</button>
+            <div class="control-grid">
+              <button class="control-button" id="pauseButton" type="button">⏸ Pause</button>
+              <button class="control-button" id="stepButton" type="button">⏭ Step</button>
+              <button class="control-button" id="resetButton" type="button">↺ Reset</button>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="panel-title">Speed Control</h2>
+          <input class="range" id="speedSlider" type="range" min="0" max="2" value="1" step="1" aria-label="Animation speed">
+          <div class="speed-row">
+            <span>Slow</span>
+            <strong id="speedLabel">Medium</strong>
+            <span>Fast</span>
+          </div>
+          <div class="speed-row" style="margin-top: 8px;"><span id="stepCounter">Step: 0 / 0</span></div>
+        </section>
+
+        <section>
+          <h2 class="panel-title">Live Algorithm State</h2>
+          <div class="state-box" id="statePanel"></div>
+        </section>
+
+        <section>
+          <h2 class="panel-title">Result Panel</h2>
+          <div class="result-panel" id="resultPanel">Run an algorithm to see results here.</div>
+        </section>
+
+        <section>
+          <h2 class="panel-title">Preset Graphs</h2>
+          <div class="preset-grid" id="presetButtons" style="margin-top: 10px;"></div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <h2>Pseudocode</h2>
+        <div class="tabs" id="pseudoTabs"></div>
+      </div>
+      <div class="pseudo-wrap">
+        <pre class="pseudo-code" id="pseudoCode"></pre>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <h2>Full Code</h2>
+        <div class="tabs" id="codeTabs"></div>
+      </div>
+      <div class="code-toolbar">
+        <span id="codeTitle">JavaScript Implementation</span>
+        <button class="copy-button" id="copyCodeButton" type="button">Copy Code</button>
+      </div>
+      <div class="code-wrap">
+        <pre class="code-block" id="codeBlock"></pre>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <h2>Compare Two Graph Algorithms</h2>
+      </div>
+      <div class="algorithm-compare">
+        <div class="compare-controls">
+          <div class="field">
+            <label for="compareAlgorithmA">Algorithm A</label>
+            <select id="compareAlgorithmA"></select>
+          </div>
+          <div class="field">
+            <label for="compareAlgorithmB">Algorithm B</label>
+            <select id="compareAlgorithmB"></select>
+          </div>
+          <button class="control-button primary" id="compareButton" type="button">Compare Algorithms</button>
+        </div>
+        <div class="compare-card-grid" id="compareResults"></div>
+        <div class="compare-note" id="compareNote">Comparison uses the current graph, selected source node, and selected target node where the algorithm needs a target.</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header"><h2>Graph Algorithms — Head to Head</h2></div>
+      <div class="comparison-wrap">
+        <table class="data-table" id="comparisonTable">
+          <thead>
+            <tr><th>Algorithm</th><th>Time</th><th>Space</th><th>Shortest Path</th><th>Weighted</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr data-algo="BFS"><td>BFS</td><td>O(V+E)</td><td>O(V)</td><td>✅ Unweighted</td><td>❌</td><td>Level traversal</td></tr>
+            <tr data-algo="DFS"><td>DFS</td><td>O(V+E)</td><td>O(V)</td><td>❌</td><td>❌</td><td>Cycle detect</td></tr>
+            <tr data-algo="Dijkstra"><td>Dijkstra</td><td>O((V+E)logV)</td><td>O(V)</td><td>✅ Weighted</td><td>✅</td><td>GPS routing</td></tr>
+            <tr data-algo="A*"><td>A*</td><td>O(E log V)</td><td>O(V)</td><td>✅ Optimal</td><td>✅</td><td>Game pathfinding</td></tr>
+            <tr data-algo="Prim's MST"><td>Prim's</td><td>O(E log V)</td><td>O(V)</td><td>N/A (MST)</td><td>✅</td><td>Network cables</td></tr>
+            <tr data-algo="Kruskal's MST"><td>Kruskal's</td><td>O(E log E)</td><td>O(V)</td><td>N/A (MST)</td><td>✅</td><td>Road construction</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header"><h2>Real World Applications</h2></div>
+      <div class="apps">
+        <article class="app-card"><span>🗺️</span><h3>Google Maps</h3><p>Dijkstra and A* power shortest-route decisions across weighted road networks.</p></article>
+        <article class="app-card"><span>🌐</span><h3>Social Networks</h3><p>BFS expands by levels to discover nearby friends and mutual connections.</p></article>
+        <article class="app-card"><span>🔌</span><h3>Network Infrastructure</h3><p>Minimum spanning trees reduce cable and road construction costs.</p></article>
+        <article class="app-card"><span>🎮</span><h3>Game AI Pathfinding</h3><p>A* guides NPC movement with fast cost plus heuristic path decisions.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <a class="logo" href="stack.html"><span class="logo-mark">AV</span><span>AlgoViz</span></a>
+        <div style="margin-top: 8px;">Visualize. Understand. Master.</div>
+        <div style="margin-top: 8px;">© 2025 AlgoViz. All rights reserved. Built with ❤️ by Yashwant Wanave</div>
+      </div>
+      <div class="footer-links">
+        <a href="stack.html">Stack</a>
+        <a href="queue.html">Queue</a>
+        <a href="linkedlist.html">Linked List</a>
+        <a href="tree.html">Trees</a>
+        <a class="active" href="graph.html">Graphs</a>
+        <a href="sorting.html">Sorting</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const algorithms = ["BFS", "DFS", "Dijkstra", "A*", "Prim's MST", "Kruskal's MST"];
+    const algorithmInfo = {
+      "BFS": { time: "O(V+E)", space: "O(V)", shortest: "Unweighted only", weighted: "No", useCase: "Level traversal" },
+      "DFS": { time: "O(V+E)", space: "O(V)", shortest: "No", weighted: "No", useCase: "Cycle detection" },
+      "Dijkstra": { time: "O((V+E)logV)", space: "O(V)", shortest: "Weighted shortest path", weighted: "Yes", useCase: "GPS routing" },
+      "A*": { time: "O(E log V)", space: "O(V)", shortest: "Optimal with heuristic", weighted: "Yes", useCase: "Game pathfinding" },
+      "Prim's MST": { time: "O(E log V)", space: "O(V)", shortest: "N/A", weighted: "Yes", useCase: "Minimum cable network" },
+      "Kruskal's MST": { time: "O(E log E)", space: "O(V)", shortest: "N/A", weighted: "Yes", useCase: "Road construction" }
+    };
+    const tools = [
+      { id: "node", label: "✦ Add Node", instruction: "Click canvas to add node" },
+      { id: "edge", label: "↔ Add Edge", instruction: "Click source node, then target node" },
+      { id: "select", label: "☞ Select/Drag", instruction: "Drag nodes or select edges" },
+      { id: "delete", label: "🗑️ Delete", instruction: "Click a node or edge to delete it" }
+    ];
+    const speedMap = [
+      { label: "Slow", delay: 1000 },
+      { label: "Medium", delay: 400 },
+      { label: "Fast", delay: 80 }
+    ];
+
+    const pseudo = {
+      "BFS": [
+        "procedure BFS(graph, source):",
+        "queue = [source]",
+        "visited = {source}",
+        "while queue not empty:",
+        "node = queue.dequeue()",
+        "visit(node)",
+        "for each neighbor of node:",
+        "if neighbor not in visited:",
+        "visited.add(neighbor)",
+        "queue.enqueue(neighbor)"
+      ],
+      "DFS": [
+        "procedure DFS(graph, source):",
+        "stack = [source]",
+        "visited = {}",
+        "while stack not empty:",
+        "node = stack.pop()",
+        "if node not in visited:",
+        "visited.add(node)",
+        "visit(node)",
+        "for each neighbor of node:",
+        "if neighbor not in visited:",
+        "stack.push(neighbor)"
+      ],
+      "Dijkstra": [
+        "procedure DIJKSTRA(graph, source):",
+        "dist[source] = 0",
+        "dist[all others] = ∞",
+        "pq = priority_queue()",
+        "pq.push((0, source))",
+        "while pq not empty:",
+        "(d, node) = pq.pop_min()",
+        "if d > dist[node]: continue",
+        "for each (neighbor, weight) of node:",
+        "newDist = dist[node] + weight",
+        "if newDist < dist[neighbor]:",
+        "dist[neighbor] = newDist",
+        "prev[neighbor] = node",
+        "pq.push((newDist, neighbor))"
+      ],
+      "A*": [
+        "procedure A_STAR(graph, source, target):",
+        "g[source] = 0",
+        "f[source] = heuristic(source, target)",
+        "openSet = {source}",
+        "while openSet not empty:",
+        "current = node in openSet with lowest f",
+        "if current == target: return path",
+        "openSet.remove(current)",
+        "for each neighbor of current:",
+        "tentative_g = g[current] + cost(current, neighbor)",
+        "if tentative_g < g[neighbor]:",
+        "g[neighbor] = tentative_g",
+        "f[neighbor] = g[neighbor] + heuristic(neighbor, target)",
+        "prev[neighbor] = current",
+        "openSet.add(neighbor)"
+      ],
+      "Prim's MST": [
+        "procedure PRIMS(graph, source):",
+        "inMST = {source}",
+        "key[source] = 0",
+        "key[all others] = ∞",
+        "while inMST.size < V:",
+        "u = min key vertex not in MST",
+        "inMST.add(u)",
+        "for each (v, weight) of u:",
+        "if v not in inMST and weight < key[v]:",
+        "key[v] = weight",
+        "parent[v] = u"
+      ],
+      "Kruskal's MST": [
+        "procedure KRUSKALS(graph):",
+        "sort all edges by weight",
+        "unionFind = initialize()",
+        "mst = []",
+        "for each edge (u, v, w) in sorted order:",
+        "if find(u) != find(v):",
+        "mst.add(edge)",
+        "union(u, v)",
+        "if mst.size == V-1: break",
+        "return mst"
+      ]
+    };
+
+    const codeSamples = {
+      JavaScript: `class Graph {
+  constructor() { this.adj = new Map(); }
+  addNode(v) { if (!this.adj.has(v)) this.adj.set(v, []); }
+  addEdge(u, v, w = 1) {
+    this.addNode(u); this.addNode(v);
+    this.adj.get(u).push([v, w]);
+    this.adj.get(v).push([u, w]);
+  }
+  bfs(src) {
+    const q = [src], seen = new Set([src]), order = [];
+    while (q.length) {
+      const u = q.shift(); order.push(u);
+      for (const [v] of this.adj.get(u)) if (!seen.has(v)) {
+        seen.add(v); q.push(v);
+      }
+    }
+    return order;
+  }
+  dfs(src) {
+    const stack = [src], seen = new Set(), order = [];
+    while (stack.length) {
+      const u = stack.pop();
+      if (seen.has(u)) continue;
+      seen.add(u); order.push(u);
+      for (const [v] of [...this.adj.get(u)].reverse()) if (!seen.has(v)) stack.push(v);
+    }
+    return order;
+  }
+  dijkstra(src) {
+    const dist = {}, prev = {};
+    for (const v of this.adj.keys()) { dist[v] = Infinity; prev[v] = null; }
+    dist[src] = 0;
+    const pq = [[0, src]];
+    while (pq.length) {
+      pq.sort((a, b) => a[0] - b[0]);
+      const [d, u] = pq.shift();
+      if (d > dist[u]) continue;
+      for (const [v, w] of this.adj.get(u)) {
+        if (d + w < dist[v]) { dist[v] = d + w; prev[v] = u; pq.push([dist[v], v]); }
+      }
+    }
+    return { dist, prev };
+  }
+  aStar(src, target, h) {
+    const g = {}, f = {}, prev = {}, open = new Set([src]);
+    for (const v of this.adj.keys()) { g[v] = Infinity; f[v] = Infinity; prev[v] = null; }
+    g[src] = 0; f[src] = h(src, target);
+    while (open.size) {
+      const current = [...open].sort((a, b) => f[a] - f[b])[0];
+      if (current === target) return { g, f, prev };
+      open.delete(current);
+      for (const [n, w] of this.adj.get(current)) {
+        const tentative = g[current] + w;
+        if (tentative < g[n]) { prev[n] = current; g[n] = tentative; f[n] = tentative + h(n, target); open.add(n); }
+      }
+    }
+    return { g, f, prev };
+  }
+  prim(src) {
+    const inMST = new Set([src]), mst = [];
+    while (inMST.size < this.adj.size) {
+      let best = null;
+      for (const u of inMST) for (const [v, w] of this.adj.get(u))
+        if (!inMST.has(v) && (!best || w < best.w)) best = { u, v, w };
+      if (!best) break;
+      inMST.add(best.v); mst.push(best);
+    }
+    return mst;
+  }
+  kruskal(edges) {
+    const parent = new Map([...this.adj.keys()].map(v => [v, v]));
+    const find = x => parent.get(x) === x ? x : (parent.set(x, find(parent.get(x))), parent.get(x));
+    const mst = [];
+    for (const e of edges.sort((a, b) => a.w - b.w)) if (find(e.u) !== find(e.v)) {
+      parent.set(find(e.u), find(e.v)); mst.push(e);
+    }
+    return mst;
+  }
+}`,
+      Python: `from heapq import heappush, heappop
+from collections import deque
+
+def bfs(adj, src):
+    q, seen, order = deque([src]), {src}, []
+    while q:
+        u = q.popleft(); order.append(u)
+        for v, _ in adj[u]:
+            if v not in seen:
+                seen.add(v); q.append(v)
+    return order
+
+def dfs(adj, src):
+    stack, seen, order = [src], set(), []
+    while stack:
+        u = stack.pop()
+        if u in seen: continue
+        seen.add(u); order.append(u)
+        for v, _ in reversed(adj[u]):
+            if v not in seen: stack.append(v)
+    return order
+
+def dijkstra(adj, src):
+    dist = {v: float("inf") for v in adj}; prev = {v: None for v in adj}
+    dist[src] = 0; pq = [(0, src)]
+    while pq:
+        d, u = heappop(pq)
+        if d > dist[u]: continue
+        for v, w in adj[u]:
+            nd = d + w
+            if nd < dist[v]:
+                dist[v], prev[v] = nd, u
+                heappush(pq, (nd, v))
+    return dist, prev
+
+def a_star(adj, src, target, h):
+    g = {v: float("inf") for v in adj}; f = dict(g); prev = {v: None for v in adj}
+    g[src] = 0; f[src] = h(src, target); open_set = {src}
+    while open_set:
+        u = min(open_set, key=lambda x: f[x])
+        if u == target: return g, f, prev
+        open_set.remove(u)
+        for v, w in adj[u]:
+            tg = g[u] + w
+            if tg < g[v]:
+                prev[v], g[v], f[v] = u, tg, tg + h(v, target)
+                open_set.add(v)
+    return g, f, prev
+
+def prim(adj, src):
+    seen, mst = {src}, []
+    while len(seen) < len(adj):
+        best = min((w, u, v) for u in seen for v, w in adj[u] if v not in seen)
+        w, u, v = best; seen.add(v); mst.append((u, v, w))
+    return mst
+
+def kruskal(vertices, edges):
+    parent = {v: v for v in vertices}
+    def find(x):
+        if parent[x] != x: parent[x] = find(parent[x])
+        return parent[x]
+    mst = []
+    for u, v, w in sorted(edges, key=lambda e: e[2]):
+        if find(u) != find(v):
+            parent[find(u)] = find(v); mst.append((u, v, w))
+    return mst`,
+      "C++": `#include <bits/stdc++.h>
+using namespace std;
+
+void bfs(vector<vector<int>>& adj, int src, int V) {
+  vector<bool> visited(V, false);
+  queue<int> q; visited[src] = true; q.push(src);
+  while (!q.empty()) {
+    int node = q.front(); q.pop(); cout << node << " ";
+    for (int neighbor : adj[node]) if (!visited[neighbor]) {
+      visited[neighbor] = true; q.push(neighbor);
+    }
+  }
+}
+void dfsUtil(vector<vector<int>>& adj, int node, vector<bool>& visited) {
+  visited[node] = true; cout << node << " ";
+  for (int neighbor : adj[node]) if (!visited[neighbor]) dfsUtil(adj, neighbor, visited);
+}
+void dfs(vector<vector<int>>& adj, int src, int V) {
+  vector<bool> visited(V, false); dfsUtil(adj, src, visited);
+}
+vector<int> dijkstra(vector<vector<pair<int,int>>>& adj, int src, int V) {
+  vector<int> dist(V, INT_MAX);
+  priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+  dist[src] = 0; pq.push({0, src});
+  while (!pq.empty()) {
+    auto [d, u] = pq.top(); pq.pop();
+    if (d > dist[u]) continue;
+    for (auto [v, w] : adj[u]) if (dist[u] + w < dist[v]) {
+      dist[v] = dist[u] + w; pq.push({dist[v], v});
+    }
+  }
+  return dist;
+}
+int primsMST(vector<vector<pair<int,int>>>& adj, int V) {
+  vector<int> key(V, INT_MAX); vector<bool> inMST(V, false);
+  key[0] = 0; int totalWeight = 0;
+  for (int i = 0; i < V; i++) {
+    int u = -1;
+    for (int v = 0; v < V; v++) if (!inMST[v] && (u == -1 || key[v] < key[u])) u = v;
+    inMST[u] = true; totalWeight += key[u];
+    for (auto [v, w] : adj[u]) if (!inMST[v] && w < key[v]) key[v] = w;
+  }
+  return totalWeight;
+}
+struct Edge { int u, v, w; };
+struct UnionFind {
+  vector<int> parent, rank;
+  UnionFind(int n): parent(n), rank(n, 0) { iota(parent.begin(), parent.end(), 0); }
+  int find(int x){ return parent[x] == x ? x : parent[x] = find(parent[x]); }
+  bool unite(int x, int y){
+    x = find(x); y = find(y); if (x == y) return false;
+    if (rank[x] < rank[y]) swap(x, y);
+    parent[y] = x; if (rank[x] == rank[y]) rank[x]++;
+    return true;
+  }
+};
+int kruskalsMST(vector<Edge>& edges, int V) {
+  sort(edges.begin(), edges.end(), [](auto& a, auto& b){ return a.w < b.w; });
+  UnionFind uf(V); int totalWeight = 0, edgeCount = 0;
+  for (auto& [u, v, w] : edges) if (uf.unite(u, v)) {
+    totalWeight += w; if (++edgeCount == V - 1) break;
+  }
+  return totalWeight;
+}`,
+      Java: `import java.util.*;
+
+class GraphAlgorithms {
+  static List<Integer> bfs(List<List<int[]>> adj, int src) {
+    boolean[] seen = new boolean[adj.size()];
+    Queue<Integer> q = new ArrayDeque<>();
+    List<Integer> order = new ArrayList<>();
+    seen[src] = true; q.add(src);
+    while (!q.isEmpty()) {
+      int u = q.remove(); order.add(u);
+      for (int[] e : adj.get(u)) if (!seen[e[0]]) { seen[e[0]] = true; q.add(e[0]); }
+    }
+    return order;
+  }
+  static void dfs(List<List<int[]>> adj, int u, boolean[] seen, List<Integer> order) {
+    seen[u] = true; order.add(u);
+    for (int[] e : adj.get(u)) if (!seen[e[0]]) dfs(adj, e[0], seen, order);
+  }
+  static int[] dijkstra(List<List<int[]>> adj, int src) {
+    int n = adj.size(); int[] dist = new int[n]; Arrays.fill(dist, Integer.MAX_VALUE);
+    PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a[0]));
+    dist[src] = 0; pq.add(new int[]{0, src});
+    while (!pq.isEmpty()) {
+      int[] cur = pq.remove(); int d = cur[0], u = cur[1];
+      if (d > dist[u]) continue;
+      for (int[] e : adj.get(u)) if (d + e[1] < dist[e[0]]) {
+        dist[e[0]] = d + e[1]; pq.add(new int[]{dist[e[0]], e[0]});
+      }
+    }
+    return dist;
+  }
+  static int prim(List<List<int[]>> adj) {
+    int n = adj.size(), total = 0; boolean[] used = new boolean[n]; int[] key = new int[n];
+    Arrays.fill(key, Integer.MAX_VALUE); key[0] = 0;
+    for (int i = 0; i < n; i++) {
+      int u = -1;
+      for (int v = 0; v < n; v++) if (!used[v] && (u == -1 || key[v] < key[u])) u = v;
+      used[u] = true; total += key[u];
+      for (int[] e : adj.get(u)) if (!used[e[0]] && e[1] < key[e[0]]) key[e[0]] = e[1];
+    }
+    return total;
+  }
+}`
+    };
+
+    class Graph {
+      constructor() {
+        this.nodes = new Map();
+        this.edges = new Map();
+        this.nextNodeIndex = 0;
+        this.nextEdgeIndex = 0;
+      }
+      nextLabel() {
+        const i = this.nextNodeIndex++;
+        return i < 26 ? String.fromCharCode(65 + i) : `N${i - 25}`;
+      }
+      addNode(x, y, label = this.nextLabel()) {
+        if (this.nodes.size >= 15) return null;
+        const id = `n${Date.now()}${Math.random().toString(16).slice(2)}`;
+        const node = { id, label, x, y };
+        this.nodes.set(id, node);
+        return node;
+      }
+      removeNode(id) {
+        [...this.edges.values()].forEach(edge => {
+          if (edge.from === id || edge.to === id) this.edges.delete(edge.id);
+        });
+        this.nodes.delete(id);
+      }
+      addEdge(from, to, weight = 1, directed = graphDirected) {
+        if (from === to) return { error: "Self-loops are not allowed." };
+        const duplicate = [...this.edges.values()].some(edge =>
+          edge.from === from && edge.to === to || (!edge.directed && !directed && edge.from === to && edge.to === from)
+        );
+        if (duplicate) return { error: "Duplicate edge already exists." };
+        const id = `e${++this.nextEdgeIndex}`;
+        const edge = { id, from, to, weight, directed };
+        this.edges.set(id, edge);
+        return { edge };
+      }
+      removeEdge(id) {
+        this.edges.delete(id);
+      }
+      getNeighbors(nodeId) {
+        const neighbors = [];
+        for (const edge of this.edges.values()) {
+          if (edge.from === nodeId) neighbors.push({ node: this.nodes.get(edge.to), weight: edge.weight, edgeId: edge.id });
+          if (!edge.directed && edge.to === nodeId) neighbors.push({ node: this.nodes.get(edge.from), weight: edge.weight, edgeId: edge.id });
+        }
+        return neighbors.filter(item => item.node);
+      }
+      clear() {
+        this.nodes.clear();
+        this.edges.clear();
+        this.nextNodeIndex = 0;
+        this.nextEdgeIndex = 0;
+      }
+      toAdjMatrix() {
+        const nodes = [...this.nodes.values()];
+        const index = new Map(nodes.map((node, i) => [node.id, i]));
+        const matrix = nodes.map(() => nodes.map(() => 0));
+        for (const edge of this.edges.values()) {
+          const i = index.get(edge.from), j = index.get(edge.to);
+          matrix[i][j] = graphWeighted ? edge.weight : 1;
+          if (!edge.directed) matrix[j][i] = graphWeighted ? edge.weight : 1;
+        }
+        const header = `    ${nodes.map(n => n.label.padStart(4)).join("")}`;
+        const rows = matrix.map((row, i) => `${nodes[i].label.padEnd(3)} [${row.map(v => String(v).padStart(3)).join(", ")}]`);
+        return nodes.length ? [header, ...rows].join("\\n") : "No nodes yet. Click the canvas to add nodes.";
+      }
+      toAdjList() {
+        if (!this.nodes.size) return "No nodes yet. Click the canvas to add nodes.";
+        return [...this.nodes.values()].map(node => {
+          const items = this.getNeighbors(node.id).map(n => `→ ${n.node.label}(${graphWeighted ? n.weight : 1})`).join(" ");
+          return `${node.label}: ${items || "[]"}`;
+        }).join("\\n");
+      }
+      degree(id) {
+        return this.getNeighbors(id).length;
+      }
+    }
+
+    const dom = {
+      menuButton: document.getElementById("menuButton"),
+      navLinks: document.getElementById("navLinks"),
+      algorithmPills: document.getElementById("algorithmPills"),
+      undirectedButton: document.getElementById("undirectedButton"),
+      directedButton: document.getElementById("directedButton"),
+      unweightedButton: document.getElementById("unweightedButton"),
+      weightedButton: document.getElementById("weightedButton"),
+      toolButtons: document.getElementById("toolButtons"),
+      instructionText: document.getElementById("instructionText"),
+      graphSvg: document.getElementById("graphSvg"),
+      viewport: document.getElementById("viewport"),
+      edgesLayer: document.getElementById("edgesLayer"),
+      nodesLayer: document.getElementById("nodesLayer"),
+      canvasWrap: document.getElementById("canvasWrap"),
+      progressBar: document.getElementById("progressBar"),
+      weightPopup: document.getElementById("weightPopup"),
+      weightInput: document.getElementById("weightInput"),
+      weightSaveButton: document.getElementById("weightSaveButton"),
+      contextMenu: document.getElementById("contextMenu"),
+      nodeTooltip: document.getElementById("nodeTooltip"),
+      zoomInButton: document.getElementById("zoomInButton"),
+      zoomOutButton: document.getElementById("zoomOutButton"),
+      fitButton: document.getElementById("fitButton"),
+      deleteButton: document.getElementById("deleteButton"),
+      undoButton: document.getElementById("undoButton"),
+      matrixButton: document.getElementById("matrixButton"),
+      listButton: document.getElementById("listButton"),
+      representationOutput: document.getElementById("representationOutput"),
+      statsGrid: document.getElementById("statsGrid"),
+      sourceSelect: document.getElementById("sourceSelect"),
+      targetSelect: document.getElementById("targetSelect"),
+      targetField: document.getElementById("targetField"),
+      runButton: document.getElementById("runButton"),
+      pauseButton: document.getElementById("pauseButton"),
+      stepButton: document.getElementById("stepButton"),
+      resetButton: document.getElementById("resetButton"),
+      speedSlider: document.getElementById("speedSlider"),
+      speedLabel: document.getElementById("speedLabel"),
+      stepCounter: document.getElementById("stepCounter"),
+      statePanel: document.getElementById("statePanel"),
+      resultPanel: document.getElementById("resultPanel"),
+      presetButtons: document.getElementById("presetButtons"),
+      pseudoTabs: document.getElementById("pseudoTabs"),
+      pseudoCode: document.getElementById("pseudoCode"),
+      codeTabs: document.getElementById("codeTabs"),
+      codeTitle: document.getElementById("codeTitle"),
+      codeBlock: document.getElementById("codeBlock"),
+      copyCodeButton: document.getElementById("copyCodeButton"),
+      compareAlgorithmA: document.getElementById("compareAlgorithmA"),
+      compareAlgorithmB: document.getElementById("compareAlgorithmB"),
+      compareButton: document.getElementById("compareButton"),
+      compareResults: document.getElementById("compareResults"),
+      compareNote: document.getElementById("compareNote"),
+      comparisonTable: document.getElementById("comparisonTable")
+    };
+
+    const graph = new Graph();
+    let activeAlgorithm = "BFS";
+    let activeTool = "node";
+    let graphDirected = false;
+    let graphWeighted = false;
+    let representationMode = "matrix";
+    let sourceId = null;
+    let targetId = null;
+    let selectedNodeId = null;
+    let selectedEdgeId = null;
+    let edgeStartId = null;
+    let pendingEdge = null;
+    let dragNodeId = null;
+    let dragMoved = false;
+    let zoom = 1;
+    let pan = { x: 0, y: 0 };
+    let actionHistory = [];
+    let nodeStates = new Map();
+    let edgeStates = new Map();
+    let steps = [];
+    let stepIndex = 0;
+    let isRunning = false;
+    let isPaused = false;
+    let highlightedLine = null;
+    let activeCodeLanguage = "JavaScript";
+    let resultPath = [];
+
+    function escapeHTML(value) {
+      return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    function getDelay() {
+      return speedMap[Number(dom.speedSlider.value)].delay;
+    }
+    function clientToWorld(clientX, clientY) {
+      const rect = dom.graphSvg.getBoundingClientRect();
+      return { x: (clientX - rect.left - pan.x) / zoom, y: (clientY - rect.top - pan.y) / zoom };
+    }
+    function updateTransform() {
+      dom.viewport.setAttribute("transform", `translate(${pan.x}, ${pan.y}) scale(${zoom})`);
+    }
+    function setStatus(message) {
+      dom.instructionText.textContent = message;
+    }
+    function hideFloating() {
+      dom.contextMenu.classList.remove("active");
+      dom.weightPopup.classList.remove("active");
+      dom.nodeTooltip.classList.remove("active");
+    }
+
+    function renderAlgorithms() {
+      dom.algorithmPills.innerHTML = "";
+      algorithms.forEach(algo => {
+        const button = document.createElement("button");
+        button.className = `pill${algo === activeAlgorithm ? " active" : ""}`;
+        button.type = "button";
+        button.dataset.algorithm = algo;
+        button.textContent = algo;
+        button.addEventListener("click", () => {
+          activeAlgorithm = algo;
+          resetAlgorithm();
+          renderAlgorithms();
+          renderPseudoTabs();
+          renderPseudo();
+          renderComparisonHighlight();
+          updateTargetVisibility();
+        });
+        dom.algorithmPills.appendChild(button);
+      });
+    }
+
+    function renderTools() {
+      dom.toolButtons.innerHTML = "";
+      tools.forEach(tool => {
+        const button = document.createElement("button");
+        button.className = `tool-button${tool.id === activeTool ? " active" : ""}`;
+        button.type = "button";
+        button.textContent = tool.label;
+        button.addEventListener("click", () => setTool(tool.id));
+        dom.toolButtons.appendChild(button);
+      });
+    }
+
+    function setTool(toolId) {
+      activeTool = toolId;
+      edgeStartId = null;
+      const tool = tools.find(item => item.id === toolId);
+      setStatus(tool.instruction);
+      renderTools();
+      renderGraph();
+    }
+
+    function renderGraph() {
+      dom.edgesLayer.innerHTML = "";
+      dom.nodesLayer.innerHTML = "";
+      for (const edge of graph.edges.values()) renderEdge(edge);
+      for (const node of graph.nodes.values()) renderNode(node);
+      updateDropdowns();
+      updateRepresentation();
+      updateStats();
+    }
+
+    function nodeClass(id) {
+      const state = nodeStates.get(id);
+      const node = graph.nodes.get(id);
+      const parts = ["svg-node"];
+      if (id === sourceId) parts.push("node-source");
+      if (id === targetId && requiresTarget()) parts.push("node-target");
+      if (state) parts.push(`node-${state}`);
+      if (id === selectedNodeId || id === edgeStartId) parts.push("selected");
+      if (!state && id !== sourceId && id !== targetId) parts.push("node-unvisited");
+      return parts.join(" ");
+    }
+
+    function edgeClass(id) {
+      const state = edgeStates.get(id);
+      const parts = ["svg-edge"];
+      if (state) parts.push(`edge-${state}`);
+      if (id === selectedEdgeId) parts.push("edge-shortest");
+      return parts.join(" ");
+    }
+
+    function renderNode(node) {
+      const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      group.setAttribute("data-node-id", node.id);
+      group.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+      group.style.cursor = activeTool === "delete" ? "not-allowed" : "grab";
+
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("r", 24);
+      circle.setAttribute("class", nodeClass(node.id));
+      circle.setAttribute("fill", "var(--node-default)");
+      circle.setAttribute("stroke", "var(--accent)");
+      circle.setAttribute("stroke-width", "2.5");
+      group.appendChild(circle);
+
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("class", "node-text");
+      text.textContent = node.label;
+      group.appendChild(text);
+
+      if (node.id === sourceId || node.id === targetId) {
+        const badge = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        badge.setAttribute("class", "node-badge");
+        badge.setAttribute("y", -34);
+        badge.textContent = node.id === sourceId ? "S" : "T";
+        group.appendChild(badge);
+      }
+
+      if (nodeStates.get(node.id) === "enter") group.classList.add("node-enter");
+      group.addEventListener("mousedown", event => onNodeMouseDown(event, node.id));
+      group.addEventListener("click", event => onNodeClick(event, node.id));
+      group.addEventListener("contextmenu", event => showNodeMenu(event, node.id));
+      group.addEventListener("mouseenter", event => showNodeTooltip(event, node.id));
+      group.addEventListener("mousemove", event => moveTooltip(event));
+      group.addEventListener("mouseleave", () => dom.nodeTooltip.classList.remove("active"));
+      dom.nodesLayer.appendChild(group);
+    }
+
+    function edgePoints(edge) {
+      const from = graph.nodes.get(edge.from);
+      const to = graph.nodes.get(edge.to);
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const offset = 28;
+      return {
+        x1: from.x + dx / len * offset,
+        y1: from.y + dy / len * offset,
+        x2: to.x - dx / len * offset,
+        y2: to.y - dy / len * offset,
+        midX: (from.x + to.x) / 2,
+        midY: (from.y + to.y) / 2
+      };
+    }
+
+    function renderEdge(edge) {
+      const pts = edgePoints(edge);
+      const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      group.setAttribute("data-edge-id", edge.id);
+      group.style.cursor = activeTool === "delete" ? "not-allowed" : "pointer";
+
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("class", edgeClass(edge.id));
+      line.setAttribute("x1", pts.x1);
+      line.setAttribute("y1", pts.y1);
+      line.setAttribute("x2", pts.x2);
+      line.setAttribute("y2", pts.y2);
+      if (edge.directed) line.setAttribute("marker-end", edgeStates.get(edge.id) === "shortest" ? "url(#arrowHeadActive)" : "url(#arrowHead)");
+      group.appendChild(line);
+
+      if (graphWeighted) {
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("class", "weight-pill");
+        rect.setAttribute("x", pts.midX - 17);
+        rect.setAttribute("y", pts.midY - 12);
+        rect.setAttribute("rx", 8);
+        rect.setAttribute("width", 34);
+        rect.setAttribute("height", 22);
+        group.appendChild(rect);
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("class", "weight-label");
+        label.setAttribute("x", pts.midX);
+        label.setAttribute("y", pts.midY);
+        label.textContent = edge.weight;
+        group.appendChild(label);
+      }
+
+      group.addEventListener("click", event => onEdgeClick(event, edge.id));
+      group.addEventListener("contextmenu", event => showEdgeMenu(event, edge.id));
+      dom.edgesLayer.appendChild(group);
+    }
+
+    function onCanvasClick(event) {
+      if (event.target !== dom.graphSvg) return;
+      hideFloating();
+      selectedNodeId = null;
+      selectedEdgeId = null;
+      if (activeTool !== "node") {
+        renderGraph();
+        return;
+      }
+      if (graph.nodes.size >= 15) {
+        setStatus("Max 15 nodes allowed.");
+        return;
+      }
+      const pt = clientToWorld(event.clientX, event.clientY);
+      const node = graph.addNode(pt.x, pt.y);
+      if (!node) return;
+      actionHistory.push({ type: "node", id: node.id });
+      sourceId ||= node.id;
+      targetId ||= node.id;
+      nodeStates.set(node.id, "enter");
+      renderGraph();
+      setTimeout(() => {
+        if (nodeStates.get(node.id) === "enter") nodeStates.delete(node.id);
+        renderGraph();
+      }, 380);
+      setStatus(`Node ${node.label} added.`);
+    }
+
+    function onNodeMouseDown(event, nodeId) {
+      if (activeTool !== "select") return;
+      dragNodeId = nodeId;
+      dragMoved = false;
+      selectedNodeId = nodeId;
+      selectedEdgeId = null;
+      hideFloating();
+      renderGraph();
+      event.preventDefault();
+    }
+
+    function onNodeClick(event, nodeId) {
+      event.stopPropagation();
+      if (dragMoved) return;
+      hideFloating();
+      if (activeTool === "delete") {
+        deleteNode(nodeId);
+        return;
+      }
+      if (activeTool === "edge") {
+        handleEdgeSelection(event, nodeId);
+        return;
+      }
+      selectedNodeId = nodeId;
+      selectedEdgeId = null;
+      renderGraph();
+    }
+
+    function onEdgeClick(event, edgeId) {
+      event.stopPropagation();
+      hideFloating();
+      if (activeTool === "delete") {
+        graph.removeEdge(edgeId);
+        renderGraph();
+        return;
+      }
+      selectedEdgeId = edgeId;
+      selectedNodeId = null;
+      renderGraph();
+    }
+
+    function handleEdgeSelection(event, nodeId) {
+      if (!edgeStartId) {
+        edgeStartId = nodeId;
+        const label = graph.nodes.get(nodeId).label;
+        setStatus(`Select target node for ${label}...`);
+        renderGraph();
+        return;
+      }
+      if (edgeStartId === nodeId) {
+        setStatus("Self-loops are not allowed.");
+        edgeStartId = null;
+        renderGraph();
+        return;
+      }
+      if (graphWeighted) {
+        pendingEdge = { from: edgeStartId, to: nodeId };
+        const rect = dom.canvasWrap.getBoundingClientRect();
+        dom.weightPopup.style.left = `${event.clientX - rect.left}px`;
+        dom.weightPopup.style.top = `${event.clientY - rect.top}px`;
+        dom.weightInput.value = "1";
+        dom.weightPopup.classList.add("active");
+        dom.weightInput.focus();
+      } else {
+        finishAddEdge(edgeStartId, nodeId, 1);
+      }
+      edgeStartId = null;
+      renderGraph();
+    }
+
+    function finishAddEdge(from, to, weight) {
+      const result = graph.addEdge(from, to, weight, graphDirected);
+      if (result.error) {
+        setStatus(result.error);
+        return;
+      }
+      actionHistory.push({ type: "edge", id: result.edge.id });
+      setStatus(`Edge ${graph.nodes.get(from).label} → ${graph.nodes.get(to).label} added.`);
+      renderGraph();
+    }
+
+    function deleteNode(nodeId) {
+      graph.removeNode(nodeId);
+      if (sourceId === nodeId) sourceId = graph.nodes.keys().next().value || null;
+      if (targetId === nodeId) targetId = graph.nodes.keys().next().value || null;
+      selectedNodeId = null;
+      renderGraph();
+    }
+
+    function deleteSelected() {
+      if (selectedNodeId) deleteNode(selectedNodeId);
+      else if (selectedEdgeId) {
+        graph.removeEdge(selectedEdgeId);
+        selectedEdgeId = null;
+        renderGraph();
+      }
+    }
+
+    function undo() {
+      const last = actionHistory.pop();
+      if (!last) return;
+      if (last.type === "node") graph.removeNode(last.id);
+      if (last.type === "edge") graph.removeEdge(last.id);
+      renderGraph();
+    }
+
+    function showNodeMenu(event, nodeId) {
+      event.preventDefault();
+      event.stopPropagation();
+      selectedNodeId = nodeId;
+      selectedEdgeId = null;
+      const node = graph.nodes.get(nodeId);
+      dom.contextMenu.innerHTML = `
+        <button data-action="source">Set ${node.label} as Source</button>
+        <button data-action="target">Set ${node.label} as Target</button>
+        <button data-action="delete">Delete Node</button>
+      `;
+      showMenuAt(event);
+      dom.contextMenu.onclick = menuEvent => {
+        const action = menuEvent.target.dataset.action;
+        if (action === "source") sourceId = nodeId;
+        if (action === "target") targetId = nodeId;
+        if (action === "delete") deleteNode(nodeId);
+        hideFloating();
+        renderGraph();
+      };
+    }
+
+    function showEdgeMenu(event, edgeId) {
+      event.preventDefault();
+      event.stopPropagation();
+      selectedEdgeId = edgeId;
+      selectedNodeId = null;
+      dom.contextMenu.innerHTML = `<button data-action="delete">Delete Edge</button>`;
+      showMenuAt(event);
+      dom.contextMenu.onclick = () => {
+        graph.removeEdge(edgeId);
+        hideFloating();
+        renderGraph();
+      };
+    }
+
+    function showMenuAt(event) {
+      const rect = dom.canvasWrap.getBoundingClientRect();
+      dom.contextMenu.style.left = `${event.clientX - rect.left}px`;
+      dom.contextMenu.style.top = `${event.clientY - rect.top}px`;
+      dom.contextMenu.classList.add("active");
+    }
+
+    function showNodeTooltip(event, nodeId) {
+      const node = graph.nodes.get(nodeId);
+      const neighbors = graph.getNeighbors(nodeId).map(n => `${node.label}-${n.node.label}`).join(", ") || "None";
+      dom.nodeTooltip.innerHTML = `<strong>Node ${node.label}</strong><br>Degree: ${graph.degree(nodeId)}<br>Edges: ${neighbors}`;
+      dom.nodeTooltip.classList.add("active");
+      moveTooltip(event);
+    }
+    function moveTooltip(event) {
+      const rect = dom.canvasWrap.getBoundingClientRect();
+      dom.nodeTooltip.style.left = `${event.clientX - rect.left + 14}px`;
+      dom.nodeTooltip.style.top = `${event.clientY - rect.top + 14}px`;
+    }
+
+    function updateDropdowns() {
+      const ids = [...graph.nodes.keys()];
+      const makeOptions = selected => ids.map(id => {
+        const node = graph.nodes.get(id);
+        return `<option value="${id}"${id === selected ? " selected" : ""}>${node.label}</option>`;
+      }).join("");
+      if (!sourceId || !graph.nodes.has(sourceId)) sourceId = ids[0] || null;
+      if (!targetId || !graph.nodes.has(targetId)) targetId = ids[ids.length - 1] || sourceId || null;
+      dom.sourceSelect.innerHTML = makeOptions(sourceId);
+      dom.targetSelect.innerHTML = makeOptions(targetId);
+    }
+
+    function updateRepresentation() {
+      dom.representationOutput.textContent = representationMode === "matrix" ? graph.toAdjMatrix() : graph.toAdjList();
+      renderAlgorithmComparison();
+    }
+
+    function graphStats() {
+      const ids = [...graph.nodes.keys()];
+      const connected = (() => {
+        if (ids.length < 2) return true;
+        const seen = new Set([ids[0]]);
+        const stack = [ids[0]];
+        while (stack.length) {
+          const id = stack.pop();
+          for (const n of graph.getNeighbors(id)) if (!seen.has(n.node.id)) {
+            seen.add(n.node.id);
+            stack.push(n.node.id);
+          }
+        }
+        return seen.size === ids.length;
+      })();
+      const hasCycle = (() => {
+        const visited = new Set();
+        function dfs(id, parent) {
+          visited.add(id);
+          for (const item of graph.getNeighbors(id)) {
+            const next = item.node.id;
+            if (!visited.has(next) && dfs(next, id)) return true;
+            if (visited.has(next) && next !== parent) return true;
+          }
+          return false;
+        }
+        return ids.some(id => !visited.has(id) && dfs(id, null));
+      })();
+      const bipartite = (() => {
+        const color = new Map();
+        for (const start of ids) {
+          if (color.has(start)) continue;
+          color.set(start, 0);
+          const q = [start];
+          while (q.length) {
+            const id = q.shift();
+            for (const item of graph.getNeighbors(id)) {
+              const next = item.node.id;
+              if (!color.has(next)) { color.set(next, 1 - color.get(id)); q.push(next); }
+              else if (color.get(next) === color.get(id)) return false;
+            }
+          }
+        }
+        return true;
+      })();
+      return { nodes: graph.nodes.size, edges: graph.edges.size, connected, hasCycle, bipartite };
+    }
+
+    function updateStats() {
+      const stats = graphStats();
+      const items = [
+        ["Nodes", stats.nodes],
+        ["Edges", stats.edges],
+        ["Connected", stats.connected ? "✅" : "❌"],
+        ["Has Cycle", stats.hasCycle ? "✅" : "❌"],
+        ["Bipartite", stats.bipartite ? "✅" : "❌"],
+        ["Mode", `${graphDirected ? "Directed" : "Undirected"} / ${graphWeighted ? "Weighted" : "Unweighted"}`]
+      ];
+      dom.statsGrid.innerHTML = items.map(([label, value]) => `<div class="stat-card"><span>${label}</span><strong>${value}</strong></div>`).join("");
+    }
+
+    function requiresTarget() {
+      return activeAlgorithm === "Dijkstra" || activeAlgorithm === "A*";
+    }
+    function updateTargetVisibility() {
+      dom.targetField.style.display = requiresTarget() ? "grid" : "none";
+    }
+
+    function resetAlgorithm() {
+      isRunning = false;
+      isPaused = false;
+      steps = [];
+      stepIndex = 0;
+      highlightedLine = null;
+      nodeStates.clear();
+      edgeStates.clear();
+      resultPath = [];
+      dom.progressBar.style.width = "0%";
+      dom.stepCounter.textContent = "Step: 0 / 0";
+      dom.pauseButton.textContent = "⏸ Pause";
+      dom.resultPanel.textContent = "Run an algorithm to see results here.";
+      renderStatePanel({});
+      renderPseudo();
+      renderGraph();
+    }
+
+    function labels(ids) {
+      return ids.filter(Boolean).map(id => graph.nodes.get(id)?.label || id);
+    }
+    function edgeLabel(edgeId) {
+      const edge = graph.edges.get(edgeId);
+      if (!edge) return "";
+      return `${graph.nodes.get(edge.from).label}-${graph.nodes.get(edge.to).label}:${edge.weight}`;
+    }
+
+    function makeStep(type, line, data = {}) {
+      return { type, line, data };
+    }
+
+    function createSteps() {
+      if (!sourceId && activeAlgorithm !== "Kruskal's MST") return [];
+      if (activeAlgorithm === "BFS") return bfsSteps(sourceId);
+      if (activeAlgorithm === "DFS") return dfsSteps(sourceId);
+      if (activeAlgorithm === "Dijkstra") return dijkstraSteps(sourceId, targetId);
+      if (activeAlgorithm === "A*") return aStarSteps(sourceId, targetId);
+      if (activeAlgorithm === "Prim's MST") return primSteps(sourceId);
+      return kruskalSteps();
+    }
+
+    function createStepsForAlgorithm(algorithm) {
+      if (!sourceId && algorithm !== "Kruskal's MST") return [];
+      if ((algorithm === "Dijkstra" || algorithm === "A*") && !targetId) return [];
+      if (algorithm === "BFS") return bfsSteps(sourceId);
+      if (algorithm === "DFS") return dfsSteps(sourceId);
+      if (algorithm === "Dijkstra") return dijkstraSteps(sourceId, targetId);
+      if (algorithm === "A*") return aStarSteps(sourceId, targetId);
+      if (algorithm === "Prim's MST") return primSteps(sourceId);
+      return kruskalSteps();
+    }
+
+    function bfsSteps(src) {
+      const out = [];
+      const visited = new Set([src]);
+      const q = [src];
+      const order = [];
+      out.push(makeStep("enqueue", 1, { queue: [...q], visited: [...visited], current: src }));
+      while (q.length) {
+        const u = q.shift();
+        order.push(u);
+        out.push(makeStep("dequeue", 4, { queue: [...q], visited: [...visited], current: u }));
+        for (const n of graph.getNeighbors(u)) {
+          out.push(makeStep("inspect", 6, { edgeId: n.edgeId, queue: [...q], visited: [...visited], current: u }));
+          if (!visited.has(n.node.id)) {
+            visited.add(n.node.id);
+            q.push(n.node.id);
+            out.push(makeStep("visit", 8, { edgeId: n.edgeId, queue: [...q], visited: [...visited], current: n.node.id }));
+          }
+        }
+      }
+      out.push(makeStep("done", 5, { visited: [...visited], result: { order, visited: visited.size, complexity: "O(V+E)" } }));
+      return out;
+    }
+
+    function dfsSteps(src) {
+      const out = [];
+      const visited = new Set();
+      const stack = [src];
+      const order = [];
+      out.push(makeStep("push", 1, { stack: [...stack], visited: [] }));
+      while (stack.length) {
+        const u = stack.pop();
+        out.push(makeStep("pop", 4, { stack: [...stack], visited: [...visited], current: u }));
+        if (visited.has(u)) continue;
+        visited.add(u);
+        order.push(u);
+        out.push(makeStep("visit", 6, { stack: [...stack], visited: [...visited], current: u }));
+        const neighbors = graph.getNeighbors(u).reverse();
+        for (const n of neighbors) {
+          if (!visited.has(n.node.id)) {
+            stack.push(n.node.id);
+            out.push(makeStep("push", 10, { edgeId: n.edgeId, stack: [...stack], visited: [...visited], current: n.node.id }));
+          }
+        }
+      }
+      out.push(makeStep("done", 7, { visited: [...visited], result: { order, visited: visited.size, complexity: "O(V+E)" } }));
+      return out;
+    }
+
+    function dijkstraSteps(src, target) {
+      const ids = [...graph.nodes.keys()];
+      const dist = Object.fromEntries(ids.map(id => [id, Infinity]));
+      const prev = Object.fromEntries(ids.map(id => [id, null]));
+      const visited = new Set();
+      const pq = [[0, src]];
+      const out = [];
+      dist[src] = 0;
+      out.push(makeStep("dist", 1, { dist: { ...dist }, prev: { ...prev }, queue: [src], current: src }));
+      while (pq.length) {
+        pq.sort((a, b) => a[0] - b[0]);
+        const [d, u] = pq.shift();
+        if (visited.has(u)) continue;
+        visited.add(u);
+        out.push(makeStep("current", 6, { dist: { ...dist }, prev: { ...prev }, visited: [...visited], current: u }));
+        if (u === target) break;
+        for (const n of graph.getNeighbors(u)) {
+          const v = n.node.id;
+          const nd = d + n.weight;
+          out.push(makeStep("relax", 9, { edgeId: n.edgeId, dist: { ...dist }, prev: { ...prev }, visited: [...visited], current: u }));
+          if (nd < dist[v]) {
+            dist[v] = nd;
+            prev[v] = u;
+            pq.push([nd, v]);
+            out.push(makeStep("update-dist", 11, { edgeId: n.edgeId, dist: { ...dist }, prev: { ...prev }, visited: [...visited], current: v, queue: pq.map(p => p[1]) }));
+          }
+        }
+      }
+      const path = buildPath(prev, src, target);
+      out.push(makeStep("found-path", 13, { dist: { ...dist }, prev: { ...prev }, path, result: { path, length: dist[target], visited: visited.size, complexity: "O((V+E) log V)" } }));
+      return out;
+    }
+
+    function aStarSteps(src, target) {
+      const ids = [...graph.nodes.keys()];
+      const g = Object.fromEntries(ids.map(id => [id, Infinity]));
+      const f = Object.fromEntries(ids.map(id => [id, Infinity]));
+      const prev = Object.fromEntries(ids.map(id => [id, null]));
+      const open = new Set([src]);
+      const closed = new Set();
+      const out = [];
+      g[src] = 0;
+      f[src] = heuristic(src, target);
+      out.push(makeStep("open", 2, { g: { ...g }, f: { ...f }, prev: { ...prev }, open: [...open], current: src }));
+      while (open.size) {
+        const current = [...open].sort((a, b) => f[a] - f[b])[0];
+        out.push(makeStep("current", 5, { g: { ...g }, f: { ...f }, prev: { ...prev }, open: [...open], closed: [...closed], current }));
+        if (current === target) break;
+        open.delete(current);
+        closed.add(current);
+        for (const n of graph.getNeighbors(current)) {
+          const v = n.node.id;
+          const tentative = g[current] + n.weight;
+          out.push(makeStep("relax", 9, { edgeId: n.edgeId, g: { ...g }, f: { ...f }, prev: { ...prev }, open: [...open], closed: [...closed], current }));
+          if (tentative < g[v]) {
+            prev[v] = current;
+            g[v] = tentative;
+            f[v] = tentative + heuristic(v, target);
+            open.add(v);
+            out.push(makeStep("update-dist", 12, { edgeId: n.edgeId, g: { ...g }, f: { ...f }, prev: { ...prev }, open: [...open], closed: [...closed], current: v }));
+          }
+        }
+      }
+      const path = buildPath(prev, src, target);
+      out.push(makeStep("found-path", 6, { g: { ...g }, f: { ...f }, prev: { ...prev }, path, result: { path, length: g[target], visited: closed.size + 1, complexity: "O(E log V)" } }));
+      return out;
+    }
+
+    function primSteps(src) {
+      const out = [];
+      const inMST = new Set([src]);
+      const mstEdges = [];
+      let total = 0;
+      out.push(makeStep("mst-start", 1, { mstNodes: [...inMST], mstEdges: [], total }));
+      while (inMST.size < graph.nodes.size) {
+        let best = null;
+        for (const u of inMST) {
+          for (const n of graph.getNeighbors(u)) {
+            if (!inMST.has(n.node.id) && (!best || n.weight < best.weight)) {
+              best = { from: u, to: n.node.id, weight: n.weight, edgeId: n.edgeId };
+            }
+          }
+        }
+        if (!best) break;
+        out.push(makeStep("relax", 8, { edgeId: best.edgeId, mstNodes: [...inMST], mstEdges: [...mstEdges], total }));
+        inMST.add(best.to);
+        mstEdges.push(best.edgeId);
+        total += best.weight;
+        out.push(makeStep("mst-add", 6, { current: best.to, edgeId: best.edgeId, mstNodes: [...inMST], mstEdges: [...mstEdges], total }));
+      }
+      out.push(makeStep("done", 10, { mstNodes: [...inMST], mstEdges: [...mstEdges], total, result: { mstEdges, length: total, visited: inMST.size, complexity: "O(E log V)" } }));
+      return out;
+    }
+
+    function kruskalSteps() {
+      const out = [];
+      const ids = [...graph.nodes.keys()];
+      const parent = Object.fromEntries(ids.map(id => [id, id]));
+      const find = x => parent[x] === x ? x : (parent[x] = find(parent[x]));
+      const sorted = [...graph.edges.values()].sort((a, b) => a.weight - b.weight);
+      const mstEdges = [];
+      let total = 0;
+      out.push(makeStep("sort", 1, { sortedEdges: sorted.map(e => e.id), mstEdges: [], total }));
+      for (const edge of sorted) {
+        out.push(makeStep("process", 4, { edgeId: edge.id, sortedEdges: sorted.map(e => e.id), mstEdges: [...mstEdges], total }));
+        if (find(edge.from) !== find(edge.to)) {
+          parent[find(edge.from)] = find(edge.to);
+          mstEdges.push(edge.id);
+          total += edge.weight;
+          out.push(makeStep("mst-add", 6, { edgeId: edge.id, mstEdges: [...mstEdges], total }));
+        } else {
+          out.push(makeStep("cycle-skip", 5, { edgeId: edge.id, mstEdges: [...mstEdges], total }));
+        }
+        if (mstEdges.length === graph.nodes.size - 1) break;
+      }
+      out.push(makeStep("done", 9, { mstEdges: [...mstEdges], total, result: { mstEdges, length: total, visited: graph.nodes.size, complexity: "O(E log E)" } }));
+      return out;
+    }
+
+    function heuristic(a, b) {
+      const n1 = graph.nodes.get(a), n2 = graph.nodes.get(b);
+      return Math.round(Math.hypot(n1.x - n2.x, n1.y - n2.y) / 80);
+    }
+
+    function buildPath(prev, src, target) {
+      const path = [];
+      let current = target;
+      while (current) {
+        path.unshift(current);
+        if (current === src) break;
+        current = prev[current];
+      }
+      return path[0] === src ? path : [];
+    }
+
+    function pathEdgeIds(path) {
+      const ids = [];
+      for (let i = 0; i < path.length - 1; i++) {
+        const edge = [...graph.edges.values()].find(e => (e.from === path[i] && e.to === path[i + 1]) || (!e.directed && e.from === path[i + 1] && e.to === path[i]));
+        if (edge) ids.push(edge.id);
+      }
+      return ids;
+    }
+
+    async function runAlgorithm() {
+      if (isRunning && isPaused) {
+        isPaused = false;
+        dom.pauseButton.textContent = "⏸ Pause";
+        await playLoop();
+        return;
+      }
+      if (isRunning) return;
+      if (graph.nodes.size === 0) {
+        setStatus("Load a preset or add nodes first.");
+        return;
+      }
+      resetAlgorithm();
+      steps = createSteps();
+      if (!steps.length) return;
+      isRunning = true;
+      isPaused = false;
+      await playLoop();
+    }
+
+    async function playLoop() {
+      while (isRunning && !isPaused && stepIndex < steps.length) {
+        applyStep(steps[stepIndex]);
+        stepIndex += 1;
+        updateProgress();
+        await sleep(getDelay());
+      }
+      if (stepIndex >= steps.length) {
+        isRunning = false;
+        isPaused = false;
+      }
+    }
+
+    function applyStep(step) {
+      nodeStates.clear();
+      edgeStates.clear();
+      highlightedLine = step.line;
+      const data = step.data || {};
+      (data.visited || data.closed || []).forEach(id => nodeStates.set(id, "visited"));
+      (data.queue || data.stack || data.open || []).forEach(id => nodeStates.set(id, "queue"));
+      (data.mstNodes || []).forEach(id => nodeStates.set(id, "visited"));
+      if (data.current) nodeStates.set(data.current, "current");
+      if (data.edgeId) edgeStates.set(data.edgeId, step.type === "cycle-skip" ? "skip" : step.type === "relax" ? "relax" : "traversed");
+      (data.mstEdges || []).forEach(id => edgeStates.set(id, "mst"));
+      if (data.path) {
+        resultPath = data.path;
+        data.path.forEach(id => nodeStates.set(id, "path"));
+        pathEdgeIds(data.path).forEach(id => edgeStates.set(id, "shortest"));
+        spawnConfetti();
+      }
+      if (data.result) renderResult(data.result);
+      renderPseudo();
+      renderStatePanel(data);
+      renderGraph();
+    }
+
+    function updateProgress() {
+      const pct = steps.length ? Math.round((stepIndex / steps.length) * 100) : 0;
+      dom.progressBar.style.width = `${pct}%`;
+      dom.stepCounter.textContent = `Step: ${Math.min(stepIndex, steps.length)} / ${steps.length}`;
+    }
+
+    function renderStatePanel(data) {
+      const chip = (id, type = "") => `<span class="state-chip ${type}">${graph.nodes.get(id)?.label || id}</span>`;
+      if (!Object.keys(data).length) {
+        dom.statePanel.innerHTML = `<span class="sub-label">Queue / Stack / Tables update here while an algorithm runs.</span>`;
+        return;
+      }
+      if (activeAlgorithm === "BFS") {
+        dom.statePanel.innerHTML = `<span class="sub-label">Queue</span><div class="chip-line">${(data.queue || []).map(id => chip(id, "queue")).join("") || "[]"}</div><span class="sub-label">Visited</span><div class="chip-line">${(data.visited || []).map(id => chip(id, "visited")).join("")}</div><p>Current: <strong>${graph.nodes.get(data.current)?.label || "-"}</strong></p>`;
+      } else if (activeAlgorithm === "DFS") {
+        dom.statePanel.innerHTML = `<span class="sub-label">Stack</span><div class="chip-line">${(data.stack || []).map(id => chip(id, "queue")).join("") || "[]"}</div><span class="sub-label">Visited</span><div class="chip-line">${(data.visited || []).map(id => chip(id, "visited")).join("")}</div><p>Current: <strong>${graph.nodes.get(data.current)?.label || "-"}</strong></p>`;
+      } else if (activeAlgorithm === "Dijkstra" || activeAlgorithm === "A*") {
+        const rows = [...graph.nodes.values()].map(node => {
+          const d = activeAlgorithm === "A*" ? data.g?.[node.id] : data.dist?.[node.id];
+          const f = data.f?.[node.id];
+          const prev = (activeAlgorithm === "A*" ? data.prev?.[node.id] : data.prev?.[node.id]);
+          return `<tr><td>${node.label}</td><td>${fmt(d)}</td>${activeAlgorithm === "A*" ? `<td>${fmt(f)}</td>` : ""}<td>${prev ? graph.nodes.get(prev).label : "-"}</td></tr>`;
+        }).join("");
+        dom.statePanel.innerHTML = `<table class="small-table"><thead><tr><th>Node</th><th>${activeAlgorithm === "A*" ? "g(n)" : "Distance"}</th>${activeAlgorithm === "A*" ? "<th>f(n)</th>" : ""}<th>Previous</th></tr></thead><tbody>${rows}</tbody></table>`;
+      } else {
+        const edges = (data.mstEdges || []).map(edgeLabel);
+        const sorted = (data.sortedEdges || []).map(edgeLabel);
+        dom.statePanel.innerHTML = `<span class="sub-label">MST Edges so far</span><div class="chip-line">${edges.map(e => `<span class="state-chip visited">${e}</span>`).join("") || "[]"}</div><p>Total MST weight: <strong>${data.total || 0}</strong></p>${sorted.length ? `<span class="sub-label">Remaining edges to process</span><div class="chip-line">${sorted.slice(0, 8).map(e => `<span class="state-chip">${e}</span>`).join("")}</div>` : ""}`;
+      }
+    }
+
+    function fmt(value) {
+      return value === Infinity || value === undefined ? "∞" : value;
+    }
+
+    function renderResult(result) {
+      if (result.order?.length) {
+        dom.resultPanel.innerHTML = `
+          <strong>Traversal Order:</strong> ${labels(result.order).join(" → ")}<br>
+          <strong>Nodes Visited:</strong> ${result.visited}<br>
+          <strong>Time Complexity:</strong> ${result.complexity}
+        `;
+        return;
+      }
+      const pathText = result.path?.length ? labels(result.path).join(" → ") : result.mstEdges?.length ? result.mstEdges.map(edgeLabel).join(", ") : "N/A";
+      dom.resultPanel.innerHTML = `
+        <strong>${activeAlgorithm.includes("MST") ? "MST Edges" : "Shortest Path"}:</strong> ${pathText}<br>
+        <strong>${activeAlgorithm.includes("MST") ? "Total MST Weight" : "Path Length"}:</strong> ${fmt(result.length)}<br>
+        <strong>Nodes Visited:</strong> ${result.visited}<br>
+        <strong>Time Complexity:</strong> ${result.complexity}
+      `;
+    }
+
+    function spawnConfetti() {
+      if (!resultPath.length) return;
+      for (let i = 0; i < 24; i++) {
+        const particle = document.createElement("span");
+        particle.className = "confetti";
+        particle.style.left = `${40 + Math.random() * 50}%`;
+        particle.style.top = `${38 + Math.random() * 24}%`;
+        particle.style.background = i % 2 ? "var(--secondary)" : "var(--accent)";
+        particle.style.setProperty("--dx", `${-100 + Math.random() * 200}px`);
+        particle.style.setProperty("--dy", `${-90 + Math.random() * 180}px`);
+        dom.canvasWrap.appendChild(particle);
+        setTimeout(() => particle.remove(), 860);
+      }
+    }
+
+    async function stepAlgorithm() {
+      if (!steps.length) steps = createSteps();
+      if (stepIndex < steps.length) {
+        isRunning = true;
+        isPaused = true;
+        applyStep(steps[stepIndex]);
+        stepIndex += 1;
+        updateProgress();
+      }
+    }
+
+    function togglePause() {
+      if (!isRunning) return;
+      isPaused = !isPaused;
+      dom.pauseButton.textContent = isPaused ? "▶ Resume" : "⏸ Pause";
+      if (!isPaused) playLoop();
+    }
+
+    function renderPseudoTabs() {
+      dom.pseudoTabs.innerHTML = "";
+      algorithms.forEach(algo => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `tab-button${algo === activeAlgorithm ? " active" : ""}`;
+        button.textContent = algo.replace(" MST", "");
+        button.addEventListener("click", () => {
+          activeAlgorithm = algo;
+          resetAlgorithm();
+          renderAlgorithms();
+          renderPseudoTabs();
+          renderPseudo();
+          renderComparisonHighlight();
+          updateTargetVisibility();
+        });
+        dom.pseudoTabs.appendChild(button);
+      });
+    }
+
+    function renderPseudo() {
+      const lines = pseudo[activeAlgorithm] || [];
+      dom.pseudoCode.innerHTML = lines.map((line, index) => `<span class="pseudo-line${highlightedLine === index ? " active" : ""}"><span>${String(index + 1).padStart(2, "0")}</span><span>${escapeHTML(line)}</span></span>`).join("");
+    }
+
+    function renderCodeTabs() {
+      dom.codeTabs.innerHTML = "";
+      Object.keys(codeSamples).forEach(lang => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `tab-button${lang === activeCodeLanguage ? " active" : ""}`;
+        button.textContent = lang;
+        button.addEventListener("click", () => {
+          activeCodeLanguage = lang;
+          renderCodeTabs();
+          renderCode();
+        });
+        dom.codeTabs.appendChild(button);
+      });
+    }
+
+    function renderCode() {
+      dom.codeTitle.textContent = `${activeCodeLanguage} Implementation`;
+      dom.codeBlock.textContent = codeSamples[activeCodeLanguage];
+    }
+
+    function renderComparisonHighlight() {
+      dom.comparisonTable.querySelectorAll("tr[data-algo]").forEach(row => {
+        row.classList.toggle("active-row", row.dataset.algo === activeAlgorithm);
+      });
+    }
+
+    function renderCompareControls() {
+      const previousA = dom.compareAlgorithmA.value || "BFS";
+      const previousB = dom.compareAlgorithmB.value || "Dijkstra";
+      const options = algorithms.map(algo => `<option value="${algo}">${algo}</option>`).join("");
+      dom.compareAlgorithmA.innerHTML = options;
+      dom.compareAlgorithmB.innerHTML = options;
+      dom.compareAlgorithmA.value = algorithms.includes(previousA) ? previousA : "BFS";
+      dom.compareAlgorithmB.value = algorithms.includes(previousB) ? previousB : "Dijkstra";
+      renderAlgorithmComparison();
+    }
+
+    function summarizeAlgorithm(algorithm) {
+      const stepsForAlgorithm = createStepsForAlgorithm(algorithm);
+      const doneStep = [...stepsForAlgorithm].reverse().find(step => step.data?.result);
+      const result = doneStep?.data?.result || {};
+      const info = algorithmInfo[algorithm];
+      let output = "No result";
+      let score = Number.POSITIVE_INFINITY;
+
+      if (result.order?.length) {
+        output = `Traversal: ${labels(result.order).join(" -> ")}`;
+        score = result.visited ?? result.order.length;
+      } else if (result.path?.length) {
+        output = `Path: ${labels(result.path).join(" -> ")}`;
+        score = Number.isFinite(result.length) ? result.length : Number.POSITIVE_INFINITY;
+      } else if (result.mstEdges?.length) {
+        output = `MST: ${result.mstEdges.map(edgeLabel).join(", ")}`;
+        score = Number.isFinite(result.length) ? result.length : Number.POSITIVE_INFINITY;
+      }
+
+      return {
+        algorithm,
+        info,
+        output,
+        steps: stepsForAlgorithm.length,
+        visited: result.visited ?? "-",
+        resultValue: Number.isFinite(result.length) ? result.length : result.order?.length ? result.order.length : "-",
+        score
+      };
+    }
+
+    function renderAlgorithmComparison() {
+      if (!dom.compareResults) return;
+      if (graph.nodes.size === 0) {
+        dom.compareResults.innerHTML = `<div class="compare-card"><h3>No graph loaded</h3><p class="compare-summary">Load a preset or build a graph to compare algorithms.</p></div>`;
+        return;
+      }
+
+      const left = summarizeAlgorithm(dom.compareAlgorithmA.value);
+      const right = summarizeAlgorithm(dom.compareAlgorithmB.value);
+      const sameKind = left.algorithm.includes("MST") === right.algorithm.includes("MST") &&
+        (left.info.shortest === right.info.shortest || (!left.algorithm.includes("MST") && !right.algorithm.includes("MST")));
+      const leftWins = left.score < right.score || (left.score === right.score && left.steps <= right.steps);
+      const rightWins = right.score < left.score || (right.score === left.score && right.steps < left.steps);
+      const card = (summary, winner) => `
+        <article class="compare-card${winner ? " winner" : ""}">
+          <h3>${summary.algorithm}<span class="winner-badge">Better here</span></h3>
+          <div class="metric-grid">
+            <div class="metric"><span>Time</span><strong>${summary.info.time}</strong></div>
+            <div class="metric"><span>Space</span><strong>${summary.info.space}</strong></div>
+            <div class="metric"><span>Weighted</span><strong>${summary.info.weighted}</strong></div>
+            <div class="metric"><span>Path Support</span><strong>${summary.info.shortest}</strong></div>
+            <div class="metric"><span>Generated Steps</span><strong>${summary.steps}</strong></div>
+            <div class="metric"><span>Visited / Weight</span><strong>${summary.resultValue}</strong></div>
+          </div>
+          <p class="compare-summary">${summary.output}</p>
+          <p class="compare-note">Best use: ${summary.info.useCase}. Visited nodes: ${summary.visited}.</p>
+        </article>
+      `;
+
+      dom.compareResults.innerHTML = card(left, sameKind && leftWins) + card(right, sameKind && rightWins);
+      dom.compareNote.textContent = sameKind
+        ? "Winner is based on the current graph result first, then generated animation step count as a tie-breaker."
+        : "These algorithms solve different graph problems, so compare their use cases and outputs rather than treating one as universally better.";
+    }
+
+    function loadPreset(name) {
+      resetAlgorithm();
+      graph.clear();
+      actionHistory = [];
+      const preset = presets[name];
+      graphDirected = false;
+      graphWeighted = name === "city" || name === "dense";
+      updateGraphTypeButtons();
+      const byLabel = new Map();
+      preset.nodes.forEach(n => {
+        const node = graph.addNode(n.x, n.y, n.label);
+        byLabel.set(n.label, node.id);
+      });
+      preset.edges.forEach(e => graph.addEdge(byLabel.get(e[0]), byLabel.get(e[1]), e[2] || 1, false));
+      sourceId = byLabel.get(preset.source || preset.nodes[0].label);
+      targetId = byLabel.get(preset.target || preset.nodes[preset.nodes.length - 1].label);
+      setTool("select");
+      resetCanvasView();
+      renderGraph();
+      setStatus(`${preset.title} loaded.`);
+    }
+
+    const presets = {
+      simple: {
+        title: "Simple Graph",
+        source: "A", target: "F",
+        nodes: [
+          { label: "A", x: 150, y: 230 }, { label: "B", x: 300, y: 120 }, { label: "C", x: 300, y: 340 },
+          { label: "D", x: 460, y: 120 }, { label: "E", x: 460, y: 340 }, { label: "F", x: 610, y: 230 }
+        ],
+        edges: [["A","B",4],["A","C",2],["B","D",5],["B","C",1],["C","E",8],["D","F",2],["E","F",3]]
+      },
+      city: {
+        title: "Weighted City Map",
+        source: "Home", target: "Mall",
+        nodes: [
+          { label: "Home", x: 110, y: 270 }, { label: "School", x: 260, y: 120 }, { label: "Market", x: 260, y: 420 },
+          { label: "Hospital", x: 430, y: 170 }, { label: "Park", x: 430, y: 370 }, { label: "Library", x: 600, y: 120 },
+          { label: "Station", x: 600, y: 420 }, { label: "Mall", x: 760, y: 270 }
+        ],
+        edges: [["Home","School",5],["Home","Market",3],["School","Hospital",4],["Market","Park",6],["Hospital","Library",2],["Park","Station",7],["Library","Mall",3],["Station","Mall",4],["Hospital","Park",5],["School","Park",8]]
+      },
+      dense: {
+        title: "Dense Network",
+        source: "A", target: "J",
+        nodes: Array.from({ length: 10 }, (_, i) => {
+          const angle = (Math.PI * 2 * i) / 10;
+          return { label: String.fromCharCode(65 + i), x: 430 + Math.cos(angle) * 250, y: 280 + Math.sin(angle) * 190 };
+        }),
+        edges: [["A","B",2],["B","C",4],["C","D",1],["D","E",7],["E","F",3],["F","G",6],["G","H",2],["H","I",5],["I","J",4],["J","A",3],["A","F",8],["B","G",5],["C","H",6],["D","I",2],["E","J",7],["A","D",9],["F","I",1]]
+      },
+      sparse: {
+        title: "Sparse Tree",
+        source: "A", target: "H",
+        nodes: [
+          { label: "A", x: 420, y: 90 }, { label: "B", x: 220, y: 230 }, { label: "C", x: 420, y: 230 }, { label: "D", x: 620, y: 230 },
+          { label: "E", x: 130, y: 390 }, { label: "F", x: 300, y: 390 }, { label: "G", x: 530, y: 390 }, { label: "H", x: 700, y: 390 }
+        ],
+        edges: [["A","B",2],["A","C",3],["A","D",4],["B","E",1],["B","F",6],["D","G",5],["D","H",2]]
+      }
+    };
+
+    function renderPresetButtons() {
+      const items = [["simple", "Simple Graph"], ["city", "Weighted City Map"], ["dense", "Dense Network"], ["sparse", "Sparse Tree"]];
+      dom.presetButtons.innerHTML = items.map(([id, label]) => `<button class="preset-button" type="button" data-preset="${id}">${label}</button>`).join("");
+      dom.presetButtons.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => loadPreset(button.dataset.preset));
+      });
+    }
+
+    function updateGraphTypeButtons() {
+      dom.undirectedButton.classList.toggle("active", !graphDirected);
+      dom.directedButton.classList.toggle("active", graphDirected);
+      dom.unweightedButton.classList.toggle("active", !graphWeighted);
+      dom.weightedButton.classList.toggle("active", graphWeighted);
+    }
+
+    function resetCanvasView() {
+      zoom = 1;
+      pan = { x: 0, y: 0 };
+      updateTransform();
+    }
+
+    function bindEvents() {
+      dom.menuButton.addEventListener("click", () => {
+        const open = document.body.classList.toggle("menu-open");
+        dom.menuButton.setAttribute("aria-expanded", String(open));
+      });
+      dom.navLinks.addEventListener("click", () => document.body.classList.remove("menu-open"));
+      dom.graphSvg.addEventListener("click", onCanvasClick);
+      document.addEventListener("mousemove", event => {
+        if (!dragNodeId) return;
+        dragMoved = true;
+        const node = graph.nodes.get(dragNodeId);
+        const pt = clientToWorld(event.clientX, event.clientY);
+        node.x = Math.max(40, pt.x);
+        node.y = Math.max(40, pt.y);
+        renderGraph();
+      });
+      document.addEventListener("mouseup", () => { dragNodeId = null; });
+      document.addEventListener("click", event => {
+        if (!dom.contextMenu.contains(event.target) && !dom.weightPopup.contains(event.target)) hideFloating();
+      });
+      dom.weightSaveButton.addEventListener("click", () => {
+        if (!pendingEdge) return;
+        const weight = Math.max(1, Math.min(99, Number(dom.weightInput.value) || 1));
+        finishAddEdge(pendingEdge.from, pendingEdge.to, weight);
+        pendingEdge = null;
+        dom.weightPopup.classList.remove("active");
+      });
+      dom.sourceSelect.addEventListener("change", event => { sourceId = event.target.value; resetAlgorithm(); renderGraph(); });
+      dom.targetSelect.addEventListener("change", event => { targetId = event.target.value; resetAlgorithm(); renderGraph(); });
+      dom.undirectedButton.addEventListener("click", () => { graphDirected = false; updateGraphTypeButtons(); });
+      dom.directedButton.addEventListener("click", () => { graphDirected = true; updateGraphTypeButtons(); });
+      dom.unweightedButton.addEventListener("click", () => { graphWeighted = false; updateGraphTypeButtons(); renderGraph(); });
+      dom.weightedButton.addEventListener("click", () => { graphWeighted = true; updateGraphTypeButtons(); renderGraph(); });
+      dom.zoomInButton.addEventListener("click", () => { zoom = Math.min(3, zoom * 1.2); updateTransform(); });
+      dom.zoomOutButton.addEventListener("click", () => { zoom = Math.max(0.4, zoom / 1.2); updateTransform(); });
+      dom.fitButton.addEventListener("click", resetCanvasView);
+      dom.deleteButton.addEventListener("click", deleteSelected);
+      dom.undoButton.addEventListener("click", undo);
+      dom.matrixButton.addEventListener("click", () => { representationMode = "matrix"; dom.matrixButton.classList.add("active"); dom.listButton.classList.remove("active"); updateRepresentation(); });
+      dom.listButton.addEventListener("click", () => { representationMode = "list"; dom.listButton.classList.add("active"); dom.matrixButton.classList.remove("active"); updateRepresentation(); });
+      dom.runButton.addEventListener("click", runAlgorithm);
+      dom.pauseButton.addEventListener("click", togglePause);
+      dom.stepButton.addEventListener("click", stepAlgorithm);
+      dom.resetButton.addEventListener("click", resetAlgorithm);
+      dom.speedSlider.addEventListener("input", () => dom.speedLabel.textContent = speedMap[Number(dom.speedSlider.value)].label);
+      dom.copyCodeButton.addEventListener("click", async () => {
+        await navigator.clipboard.writeText(codeSamples[activeCodeLanguage]);
+        dom.copyCodeButton.textContent = "Copied";
+        setTimeout(() => dom.copyCodeButton.textContent = "Copy Code", 1000);
+      });
+      dom.compareButton.addEventListener("click", renderAlgorithmComparison);
+      dom.compareAlgorithmA.addEventListener("change", renderAlgorithmComparison);
+      dom.compareAlgorithmB.addEventListener("change", renderAlgorithmComparison);
+      document.addEventListener("keydown", event => {
+        if (event.target.tagName === "INPUT" || event.target.tagName === "SELECT") return;
+        const key = event.key.toLowerCase();
+        if (key === "n") setTool("node");
+        if (key === "e") setTool("edge");
+        if (key === "s") setTool("select");
+        if (key === "d") setTool("delete");
+        if (key === "r") resetAlgorithm();
+        if (event.key === "Escape") { edgeStartId = null; hideFloating(); renderGraph(); }
+        if (event.code === "Space") { event.preventDefault(); isRunning ? togglePause() : runAlgorithm(); }
+      });
+    }
+
+    function init() {
+      renderAlgorithms();
+      renderTools();
+      renderPresetButtons();
+      renderPseudoTabs();
+      renderPseudo();
+      renderCodeTabs();
+      renderCode();
+      renderCompareControls();
+      updateGraphTypeButtons();
+      updateTargetVisibility();
+      renderComparisonHighlight();
+      bindEvents();
+      loadPreset("simple");
+    }
+
+    init();
+  </script>
+</body>
+</html>
