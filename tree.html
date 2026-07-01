@@ -162,11 +162,13 @@
         }
         .type-toggle-container {
             display: inline-flex;
-            background: var(--bg-card);
-            padding: 0.35rem;
-            border-radius: 9999px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            flex-wrap: wrap;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            border: 0;
+            box-shadow: none;
+            gap: 10px;
             margin-bottom: 1rem;
         }
         .btn-toggle {
@@ -1322,8 +1324,8 @@
             }
             .type-toggle-container {
                 flex-direction: column;
-                border-radius: 12px;
-                padding: 0.5rem;
+                border-radius: 0;
+                padding: 0;
                 width: 100%;
             }
             .btn-toggle {
@@ -1508,7 +1510,8 @@
       .av-next-section a { white-space: normal; }
     }
 
-  </style>
+    </style>
+    <link rel="stylesheet" href="shared-ui.css">
 </head>
 <body>
     <!-- 1. NAVBAR -->
